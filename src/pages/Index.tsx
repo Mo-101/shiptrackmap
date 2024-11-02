@@ -4,7 +4,6 @@ import ShipmentList from '../components/ShipmentList';
 import { Shipment } from '../types/shipment';
 
 const MOCK_SHIPMENTS: Shipment[] = [
-  // ESA Routes from Nairobi
   {
     id: '1',
     name: 'Nairobi-Tanzania Route',
@@ -16,9 +15,15 @@ const MOCK_SHIPMENTS: Shipment[] = [
     destination: {
       name: 'Dar es Salaam, Tanzania',
       coordinates: [39.2083, -6.7924],
+      country: 'Tanzania',
     },
     status: 'in-transit',
     eta: '2024-03-15',
+    consigneeAddress: '123 Port Road, Dar es Salaam',
+    ops: 'John Smith',
+    itemCategory: 'Agricultural Equipment',
+    itemDescription: 'Tractors and farming implements',
+    weight: '12,500 kg',
   },
   {
     id: '2',
@@ -31,9 +36,15 @@ const MOCK_SHIPMENTS: Shipment[] = [
     destination: {
       name: 'Kampala, Uganda',
       coordinates: [32.5899, 0.3476],
+      country: 'Uganda',
     },
     status: 'in-transit',
     eta: '2024-03-12',
+    consigneeAddress: '456 Central Avenue, Kampala',
+    ops: 'Sarah Johnson',
+    itemCategory: 'Medical Supplies',
+    itemDescription: 'Vaccines and medical equipment',
+    weight: '2,800 kg',
   },
   {
     id: '3',
@@ -46,11 +57,16 @@ const MOCK_SHIPMENTS: Shipment[] = [
     destination: {
       name: 'Addis Ababa, Ethiopia',
       coordinates: [38.7578, 9.0222],
+      country: 'Ethiopia',
     },
     status: 'in-transit',
     eta: '2024-03-14',
+    consigneeAddress: '789 Addis Ababa Road, Addis Ababa',
+    ops: 'Michael Brown',
+    itemCategory: 'Food Products',
+    itemDescription: 'Canned food and grains',
+    weight: '10,000 kg',
   },
-  // WCA Routes from Dakar
   {
     id: '4',
     name: 'Dakar-Nigeria Route',
@@ -62,9 +78,15 @@ const MOCK_SHIPMENTS: Shipment[] = [
     destination: {
       name: 'Lagos, Nigeria',
       coordinates: [3.3792, 6.5244],
+      country: 'Nigeria',
     },
     status: 'in-transit',
     eta: '2024-03-18',
+    consigneeAddress: '321 Market Street, Lagos',
+    ops: 'Lucy Green',
+    itemCategory: 'Electronics',
+    itemDescription: 'Mobile phones and accessories',
+    weight: '8,000 kg',
   },
   {
     id: '5',
@@ -77,9 +99,15 @@ const MOCK_SHIPMENTS: Shipment[] = [
     destination: {
       name: 'Accra, Ghana',
       coordinates: [-0.1869, 5.6037],
+      country: 'Ghana',
     },
     status: 'in-transit',
     eta: '2024-03-16',
+    consigneeAddress: '654 Freedom Avenue, Accra',
+    ops: 'Evelyn Reed',
+    itemCategory: 'Textiles',
+    itemDescription: 'Clothing and fabrics',
+    weight: '4,500 kg',
   },
   {
     id: '6',
@@ -92,9 +120,15 @@ const MOCK_SHIPMENTS: Shipment[] = [
     destination: {
       name: 'Douala, Cameroon',
       coordinates: [9.7068, 4.0511],
+      country: 'Cameroon',
     },
     status: 'in-transit',
     eta: '2024-03-20',
+    consigneeAddress: '987 River Road, Douala',
+    ops: 'Robert White',
+    itemCategory: 'Household Goods',
+    itemDescription: 'Furniture and appliances',
+    weight: '15,000 kg',
   },
 ];
 
