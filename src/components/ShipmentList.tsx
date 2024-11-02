@@ -21,7 +21,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({
   };
 
   return (
-    <div className="bg-white/90 backdrop-blur-sm w-80 h-full overflow-y-auto p-4 shadow-lg animate-slide-in">
+    <div className="bg-white/90 backdrop-blur-sm w-80 h-full overflow-y-auto scrollbar-hide p-4 shadow-lg animate-slide-in">
       <h2 className="text-2xl font-bold mb-6 text-primary">Active Shipments</h2>
       <div className="space-y-4">
         {shipments.map((shipment) => (
