@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Ship, Plane, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Ship, Plane, Clock, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 import { Shipment } from '../types/shipment';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 
@@ -74,6 +75,13 @@ const ShipmentList: React.FC<ShipmentListProps> = ({
                 <div className="ml-4">{shipment.itemDescription}</div>
               </div>
               <div><span className="font-bold">Weight:</span> {shipment.weight}</div>
+              <Link 
+                to={`/shipment/${shipment.id}`}
+                className="flex items-center gap-2 mt-4 text-primary hover:text-primary/80 transition-colors"
+              >
+                <ExternalLink className="w-4 h-4" />
+                View Detailed Information
+              </Link>
             </CollapsibleContent>
           </Collapsible>
         ))}

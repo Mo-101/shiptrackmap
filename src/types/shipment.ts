@@ -18,4 +18,11 @@ export interface Shipment {
   itemCategory: string;
   itemDescription: string;
   weight: string;
+  volume?: string;
+  value?: string;
+  stockRelease?: string;
+  whoDescription?: string;
+  expirationDate?: string;
+  serialNumber?: string;
+  warehouse?: string;
 }
