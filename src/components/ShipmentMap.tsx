@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import * as turf from '@turf/turf';
-import { Ship, Plane } from 'lucide-react';
 import { Shipment } from '../types/shipment';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiYWthbmltbzEiLCJhIjoiY2w5ODU2cjR2MDR3dTNxcXRpdG5jb3Z6dyJ9.vi2wspa-B9a9gYYWMpEm0A';
@@ -14,17 +13,16 @@ interface ShipmentMapProps {
 const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [routes, setRoutes] = useState<any[]>([]);
 
   useEffect(() => {
     if (!mapContainer.current) return;
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/light-v11',
-      center: [0, 20],
-      zoom: 1.5,
-      pitch: 30,
+      style: 'mapbox://styles/mapbox/dark-v11', // Changed to dark theme
+      center: [20, 5], // Centered on Africa
+      zoom: 3,
+      pitch: 45,
     });
 
     map.current.on('load', () => {
@@ -45,7 +43,7 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
           'line-cap': 'round',
         },
         paint: {
-          'line-color': ['match', ['get', 'active'], true, '#0057B8', '#B0BEC5'],
+          'line-color': ['match', ['get', 'active'], true, '#00A3E0', '#666666'],
           'line-width': ['match', ['get', 'active'], true, 3, 2],
           'line-opacity': 0.8,
         },
@@ -83,8 +81,6 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       type: 'FeatureCollection',
       features,
     });
-
-    setRoutes(features);
   }, [shipments, activeShipment]);
 
   const createArcCoordinates = (start: [number, number], end: [number, number]) => {
@@ -97,7 +93,6 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       const lat = start[1] * (1 - t) + end[1] * t;
       const lon = start[0] * (1 - t) + end[0] * t;
       
-      // Create the arc by adding altitude
       const altitude = Math.sin(Math.PI * t) * 
         turf.distance(turf.point(start), turf.point(end)) * 0.15;
       

@@ -4,49 +4,96 @@ import ShipmentList from '../components/ShipmentList';
 import { Shipment } from '../types/shipment';
 
 const MOCK_SHIPMENTS: Shipment[] = [
+  // ESA Routes from Nairobi
   {
     id: '1',
-    name: 'Cargo Express A1',
+    name: 'Nairobi-Tanzania Route',
     type: 'ship',
     origin: {
-      name: 'Shanghai, China',
-      coordinates: [121.4737, 31.2304],
+      name: 'Nairobi, Kenya',
+      coordinates: [36.8219, -1.2921],
     },
     destination: {
-      name: 'Los Angeles, USA',
-      coordinates: [-118.2437, 34.0522],
+      name: 'Dar es Salaam, Tanzania',
+      coordinates: [39.2083, -6.7924],
     },
     status: 'in-transit',
     eta: '2024-03-15',
   },
   {
     id: '2',
-    name: 'Charter Flight C7',
+    name: 'Nairobi-Uganda Route',
     type: 'charter',
     origin: {
-      name: 'Dubai, UAE',
-      coordinates: [55.2708, 25.2048],
+      name: 'Nairobi, Kenya',
+      coordinates: [36.8219, -1.2921],
     },
     destination: {
-      name: 'London, UK',
-      coordinates: [-0.1276, 51.5074],
+      name: 'Kampala, Uganda',
+      coordinates: [32.5899, 0.3476],
     },
     status: 'in-transit',
-    eta: '2024-03-10',
+    eta: '2024-03-12',
   },
   {
     id: '3',
-    name: 'Ocean Vessel B3',
-    type: 'ship',
+    name: 'Nairobi-Ethiopia Route',
+    type: 'charter',
     origin: {
-      name: 'Rotterdam, Netherlands',
-      coordinates: [4.4790, 51.9225],
+      name: 'Nairobi, Kenya',
+      coordinates: [36.8219, -1.2921],
     },
     destination: {
-      name: 'Singapore',
-      coordinates: [103.8198, 1.3521],
+      name: 'Addis Ababa, Ethiopia',
+      coordinates: [38.7578, 9.0222],
     },
-    status: 'delayed',
+    status: 'in-transit',
+    eta: '2024-03-14',
+  },
+  // WCA Routes from Dakar
+  {
+    id: '4',
+    name: 'Dakar-Nigeria Route',
+    type: 'ship',
+    origin: {
+      name: 'Dakar, Senegal',
+      coordinates: [-17.4666, 14.7167],
+    },
+    destination: {
+      name: 'Lagos, Nigeria',
+      coordinates: [3.3792, 6.5244],
+    },
+    status: 'in-transit',
+    eta: '2024-03-18',
+  },
+  {
+    id: '5',
+    name: 'Dakar-Ghana Route',
+    type: 'ship',
+    origin: {
+      name: 'Dakar, Senegal',
+      coordinates: [-17.4666, 14.7167],
+    },
+    destination: {
+      name: 'Accra, Ghana',
+      coordinates: [-0.1869, 5.6037],
+    },
+    status: 'in-transit',
+    eta: '2024-03-16',
+  },
+  {
+    id: '6',
+    name: 'Dakar-Cameroon Route',
+    type: 'charter',
+    origin: {
+      name: 'Dakar, Senegal',
+      coordinates: [-17.4666, 14.7167],
+    },
+    destination: {
+      name: 'Douala, Cameroon',
+      coordinates: [9.7068, 4.0511],
+    },
+    status: 'in-transit',
     eta: '2024-03-20',
   },
 ];
