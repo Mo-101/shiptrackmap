@@ -4,8 +4,7 @@ import * as turf from '@turf/turf';
 import { Ship, Plane } from 'lucide-react';
 import { Shipment } from '../types/shipment';
 
-// Replace with your Mapbox token
-mapboxgl.accessToken = 'pk.YOUR_MAPBOX_TOKEN';
+mapboxgl.accessToken = 'pk.eyJ1IjoiYWthbmltbzEiLCJhIjoiY2w5ODU2cjR2MDR3dTNxcXRpdG5jb3Z6dyJ9.vi2wspa-B9a9gYYWMpEm0A';
 
 interface ShipmentMapProps {
   shipments: Shipment[];
@@ -66,13 +65,13 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       const end = shipment.destination.coordinates;
       
       const route = {
-        type: 'Feature',
+        type: 'Feature' as const,
         properties: {
           active: activeShipment?.id === shipment.id,
           shipmentId: shipment.id,
         },
         geometry: {
-          type: 'LineString',
+          type: 'LineString' as const,
           coordinates: createArcCoordinates(start, end),
         },
       };
