@@ -65,15 +65,15 @@ const ShipmentList: React.FC<ShipmentListProps> = ({
                 </button>
               </CollapsibleTrigger>
             </div>
-            <CollapsibleContent className="bg-gray-50 p-4 rounded-b-lg text-sm space-y-2">
-              <div><span className="font-semibold">Destination Country:</span> {shipment.destination.country}</div>
-              <div><span className="font-semibold">Consignee Address:</span> {shipment.consigneeAddress}</div>
-              <div><span className="font-semibold">OPS:</span> {shipment.ops}</div>
+            <CollapsibleContent className="bg-ocean-light p-4 rounded-b-lg text-sm space-y-2 text-ocean-dark font-medium">
+              <div><span className="font-bold">Destination Country:</span> {shipment.destination.country}</div>
+              <div><span className="font-bold">Consignee Address:</span> {shipment.consigneeAddress}</div>
+              <div><span className="font-bold">OPS:</span> {shipment.ops}</div>
               <div>
-                <span className="font-semibold">Item Category:</span> {shipment.itemCategory}
-                <div className="text-gray-600 ml-4">{shipment.itemDescription}</div>
+                <span className="font-bold">Item Category:</span> {shipment.itemCategory}
+                <div className="ml-4">{shipment.itemDescription}</div>
               </div>
-              <div><span className="font-semibold">Weight:</span> {shipment.weight}</div>
+              <div><span className="font-bold">Weight:</span> {shipment.weight}</div>
             </CollapsibleContent>
           </Collapsible>
         ))}
