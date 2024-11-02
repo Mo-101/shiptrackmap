@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import ShipmentMap from '../components/ShipmentMap';
 import ShipmentList from '../components/ShipmentList';
+import ShipmentDetail from './ShipmentDetail';
 import { Shipment } from '../types/shipment';
 
 const MOCK_SHIPMENTS: Shipment[] = [
@@ -136,19 +138,30 @@ const Index = () => {
   const [activeShipment, setActiveShipment] = useState<Shipment | undefined>();
 
   return (
-    <div className="h-screen w-screen flex">
-      <ShipmentList
-        shipments={MOCK_SHIPMENTS}
-        activeShipment={activeShipment}
-        onShipmentSelect={setActiveShipment}
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <div className="h-screen w-screen flex">
+            <ShipmentList
+              shipments={MOCK_SHIPMENTS}
+              activeShipment={activeShipment}
+              onShipmentSelect={setActiveShipment}
+            />
+            <div className="flex-1 relative">
+              <ShipmentMap
+                shipments={MOCK_SHIPMENTS}
+                activeShipment={activeShipment}
+              />
+            </div>
+          </div>
+        }
       />
-      <div className="flex-1 relative">
-        <ShipmentMap
-          shipments={MOCK_SHIPMENTS}
-          activeShipment={activeShipment}
-        />
-      </div>
-    </div>
+      <Route
+        path="/shipment/:id"
+        element={<ShipmentDetail shipment={MOCK_SHIPMENTS.find(s => s.id === window.location.pathname.split('/').pop())} />}
+      />
+    </Routes>
   );
 };
 

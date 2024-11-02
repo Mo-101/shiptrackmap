@@ -15,6 +15,7 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<[number, number] | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -23,30 +24,14 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/dark-v11',
       center: [20, 5],
-      zoom: 3,
+      zoom: 2,
       pitch: 45,
       projection: 'mercator'
     });
 
     map.current.on('load', () => {
-      // Add water layer
-      map.current?.addSource('water', {
-        type: 'vector',
-        url: 'mapbox://mapbox.mapbox-streets-v8'
-      });
-
-      map.current?.addLayer({
-        id: 'water-features',
-        type: 'fill',
-        source: 'water',
-        'source-layer': 'water',
-        paint: {
-          'fill-color': '#0077be',
-          'fill-opacity': 0.5
-        }
-      });
-
-      // Add routes source
+      setMapLoaded(true);
+      
       map.current?.addSource('routes', {
         type: 'geojson',
         data: {
@@ -84,46 +69,26 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
   }, []);
 
   useEffect(() => {
-    if (!map.current?.isStyleLoaded()) return;
+    if (!mapLoaded || !map.current?.isStyleLoaded()) return;
 
     const features = shipments.map((shipment) => {
       const start = shipment.origin.coordinates;
       const end = shipment.destination.coordinates;
       
-      return {
-        type: 'Feature' as const,
-        properties: {
-          active: activeShipment?.id === shipment.id,
-          shipmentId: shipment.id,
-        },
-        geometry: {
-          type: 'LineString' as const,
-          coordinates: createArcCoordinates(start, end),
-        },
-      };
+      const line = turf.greatCircle(
+        turf.point(start),
+        turf.point(end),
+        { steps: 100, properties: { active: activeShipment?.id === shipment.id } }
+      );
+
+      return line;
     });
 
     (map.current.getSource('routes') as mapboxgl.GeoJSONSource).setData({
       type: 'FeatureCollection',
       features,
     });
-  }, [shipments, activeShipment]);
-
-  const createArcCoordinates = (start: [number, number], end: [number, number]) => {
-    const points = 100;
-    const arc = [];
-    
-    for (let i = 0; i <= points; i++) {
-      const t = i / points;
-      const lat = start[1] * (1 - t) + end[1] * t;
-      const lon = start[0] * (1 - t) + end[0] * t;
-      const altitude = Math.sin(Math.PI * t) * 
-        turf.distance(turf.point(start), turf.point(end)) * 0.15;
-      arc.push([lon, lat]);
-    }
-    
-    return arc;
-  };
+  }, [shipments, activeShipment, mapLoaded]);
 
   return (
     <div className="relative w-full h-full">
