@@ -31,10 +31,13 @@ const ShipmentList: React.FC<ShipmentListProps> = ({
             onOpenChange={() => toggleExpand(shipment.id)}
           >
             <div
-              className={`shipment-card ${activeShipment?.id === shipment.id ? 'active' : ''}`}
+              className={`shipment-card relative ${activeShipment?.id === shipment.id ? 'active' : ''}`}
               onClick={() => onShipmentSelect(shipment)}
             >
-              <div className="flex items-center justify-between mb-2">
+              <span className="absolute top-2 left-2 text-xs text-ocean">
+                {shipment.status}
+              </span>
+              <div className="flex items-center justify-between mb-2 mt-6">
                 <div className="flex items-center space-x-2">
                   {shipment.type === 'ship' ? (
                     <Ship className="text-shipping-dark" />
@@ -43,13 +46,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({
                   )}
                   <span className="font-semibold">{shipment.name}</span>
                 </div>
-                <span className={`text-sm px-2 py-1 rounded-full ${
-                  shipment.status === 'in-transit' ? 'bg-ocean-light text-ocean-dark' :
-                  shipment.status === 'delivered' ? 'bg-shipping-light text-shipping-dark' :
-                  'bg-red-100 text-red-800'
-                }`}>
-                  {shipment.status}
-                </span>
               </div>
               <div className="text-sm text-gray-600">
                 <div>From: {shipment.origin.name}</div>
