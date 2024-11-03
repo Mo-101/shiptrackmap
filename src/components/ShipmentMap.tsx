@@ -4,7 +4,7 @@ import * as turf from '@turf/turf';
 import { Shipment } from '../types/shipment';
 import WeatherInfo from './WeatherInfo';
 
-mapboxgl.accessToken = 'pk.eyJ1IjoiYWthbmltbzEiLCJhIjoiY2w5ODU2cjR2MDR3dTNxcXRpdG5jb3Z6dyJ9.vi2wspa-B9a9gYYWMpEm0A';
+mapboxgl.accessToken = 'pk.eyJ1IjoiYWthbmltbzEiLCJhIjoiY2w5ODU2cjR2MDR3dTNxcXRpdG5jb3Z2dyJ9.vi2wspa-B9a9gYYWMpEm0A';
 
 interface ShipmentMapProps {
   shipments: Shipment[];
@@ -78,7 +78,10 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       const line = turf.greatCircle(
         turf.point(start),
         turf.point(end),
-        { steps: 100, properties: { active: activeShipment?.id === shipment.id } }
+        { 
+          properties: { active: activeShipment?.id === shipment.id },
+          npoints: 100
+        }
       );
 
       return line;
