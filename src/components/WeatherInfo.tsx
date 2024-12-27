@@ -22,23 +22,16 @@ interface WeatherData {
 }
 
 const WeatherInfo: React.FC<WeatherInfoProps> = ({ location, onClose }) => {
-  const fetchWeather = async () => {
-    const response = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?lat=${location[1]}&lon=${location[0]}&appid=2b25b6e6eb45b6df18d92b934c332a7&units=metric`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    if (!response.ok) throw new Error('Weather data fetch failed');
-    return response.json();
-  };
-
   const { data: weather, isLoading } = useQuery<WeatherData>({
     queryKey: ['weather', location[0], location[1]],
-    queryFn: fetchWeather,
+    queryFn: async () => {
+      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${location[1]}&lon=${location[0]}&appid=2b25b6e6eb45b6df18d92b934c332a7&units=metric`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Weather data fetch failed');
+      }
+      return response.json();
+    }
   });
 
   const getWeatherIcon = (weatherMain: string) => {
