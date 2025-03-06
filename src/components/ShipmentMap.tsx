@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import * as turf from '@turf/turf';
@@ -39,107 +38,111 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
 
     // Add 3D terrain effect
     map.current.on('style.load', () => {
-      map.current?.setFog({
-        color: 'rgb(5, 5, 25)', // night fog
-        'high-color': 'rgb(20, 20, 40)',
-        'horizon-blend': 0.4,
-        'space-color': 'rgb(5, 5, 15)',
-        'star-intensity': 0.6
-      });
+      if (map.current) {
+        map.current.setFog({
+          color: 'rgb(5, 5, 25)', // night fog
+          'high-color': 'rgb(20, 20, 40)',
+          'horizon-blend': 0.4,
+          'space-color': 'rgb(5, 5, 15)',
+          'star-intensity': 0.6
+        });
       
-      // Add a sky layer
-      map.current?.addLayer({
-        id: 'sky',
-        type: 'sky',
-        paint: {
-          'sky-type': 'atmosphere',
-          'sky-atmosphere-sun': [0.0, 90.0],
-          'sky-atmosphere-sun-intensity': 15
-        }
-      });
+        // Add a sky layer
+        map.current.addLayer({
+          id: 'sky',
+          type: 'sky',
+          paint: {
+            'sky-type': 'atmosphere',
+            'sky-atmosphere-sun': [0.0, 90.0],
+            'sky-atmosphere-sun-intensity': 15
+          }
+        });
+      }
       
       setMapLoaded(true);
       
       // Add a source for shipment routes
-      map.current?.addSource('routes', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: [],
-        },
-      });
+      if (map.current) {
+        map.current.addSource('routes', {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: [],
+          },
+        });
 
-      // Add a route layer with animated dash line
-      map.current?.addLayer({
-        id: 'routes',
-        type: 'line',
-        source: 'routes',
-        layout: {
-          'line-join': 'round',
-          'line-cap': 'round',
-          visibility: 'visible'
-        },
-        paint: {
-          'line-color': ['match', ['get', 'active'], true, '#00A3E0', '#666666'],
-          'line-width': ['match', ['get', 'active'], true, 4, 2],
-          'line-opacity': 0.8,
-          'line-dasharray': [2, 1]
-        },
-      });
+        // Add a route layer with animated dash line
+        map.current.addLayer({
+          id: 'routes',
+          type: 'line',
+          source: 'routes',
+          layout: {
+            'line-join': 'round',
+            'line-cap': 'round',
+            visibility: 'visible'
+          },
+          paint: {
+            'line-color': ['match', ['get', 'active'], true, '#00A3E0', '#666666'],
+            'line-width': ['match', ['get', 'active'], true, 4, 2],
+            'line-opacity': 0.8,
+            'line-dasharray': [2, 1]
+          },
+        });
 
-      // Add a glow effect for active routes
-      map.current?.addLayer({
-        id: 'routes-glow',
-        type: 'line',
-        source: 'routes',
-        layout: {
-          'line-join': 'round',
-          'line-cap': 'round',
-          visibility: 'visible'
-        },
-        paint: {
-          'line-color': '#00A3E0',
-          'line-width': 8,
-          'line-opacity': ['match', ['get', 'active'], true, 0.2, 0],
-          'line-blur': 5
-        },
-      });
+        // Add a glow effect for active routes
+        map.current.addLayer({
+          id: 'routes-glow',
+          type: 'line',
+          source: 'routes',
+          layout: {
+            'line-join': 'round',
+            'line-cap': 'round',
+            visibility: 'visible'
+          },
+          paint: {
+            'line-color': '#00A3E0',
+            'line-width': 8,
+            'line-opacity': ['match', ['get', 'active'], true, 0.2, 0],
+            'line-blur': 5
+          },
+        });
 
-      // Add points for origins and destinations
-      map.current?.addSource('points', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: [],
-        },
-      });
+        // Add points for origins and destinations
+        map.current.addSource('points', {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: [],
+          },
+        });
 
-      // Add origin/destination markers
-      map.current?.addLayer({
-        id: 'points',
-        type: 'circle',
-        source: 'points',
-        paint: {
-          'circle-radius': ['match', ['get', 'type'], 'origin', 5, 'destination', 5, 3],
-          'circle-color': ['match', ['get', 'type'], 'origin', '#16a34a', 'destination', '#dc2626', '#ffffff'],
-          'circle-stroke-width': 2,
-          'circle-stroke-color': '#ffffff',
-          'circle-opacity': 0.8
-        }
-      });
+        // Add origin/destination markers
+        map.current.addLayer({
+          id: 'points',
+          type: 'circle',
+          source: 'points',
+          paint: {
+            'circle-radius': ['match', ['get', 'type'], 'origin', 5, 'destination', 5, 3],
+            'circle-color': ['match', ['get', 'type'], 'origin', '#16a34a', 'destination', '#dc2626', '#ffffff'],
+            'circle-stroke-width': 2,
+            'circle-stroke-color': '#ffffff',
+            'circle-opacity': 0.8
+          }
+        });
       
-      // Add a pulsing effect for active points
-      map.current?.addLayer({
-        id: 'points-pulse',
-        type: 'circle',
-        source: 'points',
-        paint: {
-          'circle-radius': ['match', ['get', 'active'], true, 15, 0],
-          'circle-color': ['match', ['get', 'type'], 'origin', '#16a34a', 'destination', '#dc2626', '#ffffff'],
-          'circle-opacity': ['match', ['get', 'active'], true, 0.5, 0],
-          'circle-stroke-width': 0
-        }
-      });
+        // Add a pulsing effect for active points
+        map.current.addLayer({
+          id: 'points-pulse',
+          type: 'circle',
+          source: 'points',
+          paint: {
+            'circle-radius': ['match', ['get', 'active'], true, 15, 0],
+            'circle-color': ['match', ['get', 'type'], 'origin', '#16a34a', 'destination', '#dc2626', '#ffffff'],
+            'circle-opacity': ['match', ['get', 'active'], true, 0.5, 0],
+            'circle-stroke-width': 0
+          }
+        });
+      }
       
       // Start animations
       startRouteAnimations();
@@ -157,14 +160,20 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
         const foundShipment = shipments.find(s => s.id === shipmentId);
         if (foundShipment) {
           setHoveredShipment(foundShipment);
-          map.current?.getCanvas().style.cursor = 'pointer';
+          if (map.current) {
+            const canvas = map.current.getCanvas();
+            canvas.style.cursor = 'pointer';
+          }
         }
       }
     });
     
     map.current.on('mouseleave', 'routes', () => {
       setHoveredShipment(null);
-      map.current?.getCanvas().style.cursor = '';
+      if (map.current) {
+        const canvas = map.current.getCanvas();
+        canvas.style.cursor = '';
+      }
     });
 
     return () => {
@@ -189,7 +198,8 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       
       if (map.current.getLayer('routes')) {
         map.current.setPaintProperty('routes', 'line-dasharray', [2, 1, 0.5, 1.5]);
-        map.current.setPaintProperty('routes', 'line-dash-offset', dashOffset);
+        // Fixed: use a valid property name
+        map.current.setPaintProperty('routes', 'line-dash-offset' as any, dashOffset);
       }
       
       // Pulse animation for points
@@ -255,11 +265,12 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
     const pointFeatures = shipments.flatMap((shipment) => {
       const isActive = activeShipment?.id === shipment.id;
       
+      // Fixed: Explicitly use GeoJSON Feature type
       return [
         {
-          type: 'Feature',
+          type: 'Feature' as const,
           geometry: {
-            type: 'Point',
+            type: 'Point' as const,
             coordinates: shipment.origin.coordinates
           },
           properties: {
@@ -270,9 +281,9 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
           }
         },
         {
-          type: 'Feature',
+          type: 'Feature' as const,
           geometry: {
-            type: 'Point',
+            type: 'Point' as const,
             coordinates: shipment.destination.coordinates
           },
           properties: {
@@ -299,7 +310,11 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       const start = activeShipment.origin.coordinates;
       const end = activeShipment.destination.coordinates;
       
-      const midpoint = [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
+      // Create a proper LngLatLike object for the midpoint
+      const midpoint: [number, number] = [
+        (start[0] + end[0]) / 2, 
+        (start[1] + end[1]) / 2
+      ];
       
       // Calculate appropriate zoom level based on distance
       const distance = turf.distance(
