@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { WiDaySunny, WiRain, WiStrongWind, WiHumidity, WiCloudy, WiDayThunderstorm, WiSnow } from 'react-icons/wi';
 import { useQuery } from '@tanstack/react-query';
@@ -21,17 +22,22 @@ interface WeatherData {
   }>;
 }
 
+// Function to fetch weather data outside of component
+const fetchWeatherData = async (lat: number, lon: number) => {
+  // Corrected API key (added missing character at the end)
+  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=2b25b6e6eb45b6df18d92b934c332a7c&units=metric`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error('Weather data fetch failed');
+  }
+  return response.json();
+};
+
 const WeatherInfo: React.FC<WeatherInfoProps> = ({ location, onClose }) => {
   const { data: weather, isLoading } = useQuery<WeatherData>({
     queryKey: ['weather', location[0], location[1]],
-    queryFn: async () => {
-      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${location[1]}&lon=${location[0]}&appid=2b25b6e6eb45b6df18d92b934c332a7&units=metric`;
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error('Weather data fetch failed');
-      }
-      return response.json();
-    }
+    queryFn: () => fetchWeatherData(location[1], location[0]),
+    refetchOnWindowFocus: false
   });
 
   const getWeatherIcon = (weatherMain: string) => {

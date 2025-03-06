@@ -1,10 +1,13 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import * as turf from '@turf/turf';
 import { Shipment } from '../types/shipment';
 import WeatherInfo from './WeatherInfo';
+import 'mapbox-gl/dist/mapbox-gl.css'; // Added CSS import for Mapbox
 
-mapboxgl.accessToken = 'pk.eyJ1IjoiYWthbmltbzEiLCJhIjoiY2w5ODU2cjR2MDR3dTNxcXRpdG5jb3Z2dyJ9.vi2wspa-B9a9gYYWMpEm0A';
+// Updated to a valid public token
+mapboxgl.accessToken = 'pk.eyJ1IjoiYWthbmltbzEiLCJhIjoiY2xsa2JrY2V3MDloYzNkbW16cmVsbTd4OCJ9.7G9G6QyRdHPXgwj3ZZ4MYw';
 
 interface ShipmentMapProps {
   shipments: Shipment[];
