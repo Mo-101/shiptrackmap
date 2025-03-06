@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import ShipmentMap from '../components/ShipmentMap';
 import ShipmentList from '../components/ShipmentList';
 import ShipmentDetail from './ShipmentDetail';
@@ -136,13 +137,25 @@ const MOCK_SHIPMENTS: Shipment[] = [
 
 const Index = () => {
   const [activeShipment, setActiveShipment] = useState<Shipment | undefined>();
+  const location = useLocation();
+  
+  // Set active shipment based on URL when on detail page
+  useEffect(() => {
+    if (location.pathname.startsWith('/shipment/')) {
+      const shipmentId = location.pathname.split('/').pop();
+      const shipment = MOCK_SHIPMENTS.find(s => s.id === shipmentId);
+      if (shipment) {
+        setActiveShipment(shipment);
+      }
+    }
+  }, [location.pathname]);
 
   return (
     <Routes>
       <Route
         path="/"
         element={
-          <div className="h-screen w-screen flex">
+          <div className="h-screen w-screen flex bg-zinc-950">
             <ShipmentList
               shipments={MOCK_SHIPMENTS}
               activeShipment={activeShipment}
@@ -159,7 +172,7 @@ const Index = () => {
       />
       <Route
         path="/shipment/:id"
-        element={<ShipmentDetail shipment={MOCK_SHIPMENTS.find(s => s.id === window.location.pathname.split('/').pop())} />}
+        element={<ShipmentDetail shipment={MOCK_SHIPMENTS.find(s => s.id === location.pathname.split('/').pop())} />}
       />
     </Routes>
   );
