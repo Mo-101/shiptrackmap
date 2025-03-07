@@ -15,6 +15,9 @@ const MapContainer: React.FC<MapContainerProps> = ({ onMapLoad }) => {
   useEffect(() => {
     if (!mapContainer.current) return;
 
+    // Set the access token before initializing the map
+    mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN || 'pk.eyJ1IjoiZXhhbXBsZXVzZXIiLCJhIjoiY2s4eXF1aDh5MDd1ZzNsbzQ0b3psZXIzNyJ9.xeI8BpZ6g6jV-IUasnS0ZA';
+
     // Fix TypeScript error by explicitly typing center as [number, number]
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
