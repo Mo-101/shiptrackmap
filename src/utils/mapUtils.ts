@@ -95,11 +95,11 @@ export const createArcRoute = (
 // Setup fog and sky effects for map
 export const setupMapEffects = (map: mapboxgl.Map) => {
   map.setFog({
-    color: 'rgb(7, 23, 119)', // Dark blue fog
-    'high-color': 'rgb(12, 58, 98)',
+    color: 'rgb(7, 23, 59)', // Darker blue fog
+    'high-color': 'rgb(12, 38, 78)',
     'horizon-blend': 0.4,
-    'space-color': 'rgb(7, 16, 60)',
-    'star-intensity': 0.8
+    'space-color': 'rgb(3, 9, 33)',
+    'star-intensity': 0.7
   });
   
   // Add a sky layer
@@ -161,7 +161,14 @@ export const initializeShipmentLayers = (map: mapboxgl.Map) => {
       },
     });
 
-    const lineColor = type === 'ship' ? '#15ABC0' : type === 'charter' ? '#62F3F7' : '#DCCC82';
+    // Define colors for different route types - using hex with alpha
+    const lineColors = {
+      ship: ['rgba(21, 171, 192, 1)', 'rgba(21, 171, 192, 0.6)'],  // Sea - Teal
+      charter: ['rgba(98, 243, 247, 1)', 'rgba(98, 243, 247, 0.6)'], // Air - Bright Teal
+      truck: ['rgba(220, 204, 130, 1)', 'rgba(220, 204, 130, 0.6)']  // Ground - Sand
+    };
+    
+    const lineColor = lineColors[type as keyof typeof lineColors];
     const lineWidth = type === 'charter' ? 3 : 2;
     
     // Add line layers for each type with different styles
@@ -175,7 +182,7 @@ export const initializeShipmentLayers = (map: mapboxgl.Map) => {
         visibility: 'visible'
       },
       paint: {
-        'line-color': ['case', ['boolean', ['get', 'active'], false], lineColor, `${lineColor}99`],
+        'line-color': ['case', ['boolean', ['get', 'active'], false], lineColor[0], lineColor[1]],
         'line-width': ['case', ['boolean', ['get', 'active'], false], lineWidth + 1, lineWidth],
         'line-opacity': 0.8,
         'line-dasharray': type === 'ship' ? [0.5, 1, 2, 1] : type === 'charter' ? [1, 3] : [0.5, 1.5]
@@ -193,7 +200,7 @@ export const initializeShipmentLayers = (map: mapboxgl.Map) => {
         visibility: 'visible'
       },
       paint: {
-        'line-color': lineColor,
+        'line-color': lineColor[0],
         'line-width': lineWidth + 6,
         'line-opacity': ['case', ['boolean', ['get', 'active'], false], 0.3, 0.1],
         'line-blur': 3

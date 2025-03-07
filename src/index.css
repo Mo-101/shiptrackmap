@@ -13,13 +13,13 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
     
-    /* New color scheme based on the provided palette */
-    --primary: 219 54% 28%;       /* #1B243A - Dark blue */
+    /* Enhanced darker color scheme */
+    --primary: 219 54% 17%;       /* Darker blue */
     --primary-foreground: 210 40% 98%;
-    --secondary: 183 71% 44%;     /* #4FA3BA - Teal */
+    --secondary: 183 71% 35%;     /* Deeper teal */
     --secondary-foreground: 210 40% 98%;
     
-    --accent: 175 88% 55%;        /* #4FF2F8 - Bright teal */
+    --accent: 175 88% 55%;        /* Bright teal - kept for contrast */
     --accent-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
@@ -63,9 +63,9 @@
     display: none;  /* Chrome, Safari and Opera */
   }
   
-  /* New utility classes for the updated design */
+  /* Enhanced utility classes for the updated design */
   .glass-panel {
-    @apply bg-primary/80 backdrop-blur-md border border-secondary/30;
+    @apply bg-primary/90 backdrop-blur-md border border-secondary/30 shadow-md;
   }
   
   .data-grid {
@@ -73,7 +73,7 @@
   }
   
   .data-card {
-    @apply bg-primary/90 backdrop-blur-md p-4 rounded-lg border border-secondary/20 shadow-lg;
+    @apply bg-primary/95 backdrop-blur-md p-4 rounded-lg border border-secondary/20 shadow-lg;
   }
   
   .animated-border {
@@ -81,6 +81,6 @@
   }
   
   .scanner-line {
-    @apply absolute h-[2px] bg-accent/70 animate-scanner pointer-events-none;
+    @apply absolute h-[2px] bg-accent/80 left-0 right-0 animate-scanner pointer-events-none;
   }
 }
