@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import * as turf from '@turf/turf';
@@ -7,8 +6,8 @@ import WeatherInfo from './WeatherInfo';
 import ShipmentTooltip from './ShipmentTooltip';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-// Using a public token that works for demo purposes
-mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA';
+// Update to use the provided token
+mapboxgl.accessToken = 'pk.eyJ1IjoiYWthbmltbzEiLCJhIjoiY2w5ODU2cjR2MDR3dTNxcXRpdG5jb3Z6dyJ9.vi2wspa-B9a9gYYWMpEm0A';
 
 interface ShipmentMapProps {
   shipments: Shipment[];
@@ -39,7 +38,7 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
+      style: 'mapbox://styles/akanimo1/clcgr62o0003c14mr8b0xg3cn',
       center: [20, 5],
       zoom: 2,
       pitch: 45,
@@ -550,3 +549,4 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
 };
 
 export default ShipmentMap;
+
