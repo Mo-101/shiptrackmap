@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Ship, Plane, Clock, ChevronDown, ChevronUp, 
-  ExternalLink, MapPin, Package, Truck, ChevronLeft 
+  ExternalLink, MapPin, Package, Truck, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { Shipment } from '../types/shipment';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
@@ -27,7 +26,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [timeDisplay, setTimeDisplay] = useState('');
 
-  // Update time every second
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date();
@@ -47,7 +45,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({
     shipment.itemCategory.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Get the appropriate icon based on shipment type
   const getShipmentIcon = (type: string) => {
     switch(type) {
       case 'ship':
@@ -211,7 +208,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({
         )}
       </div>
       
-      {/* High-tech decorative elements */}
       <div className="border-t border-palette-teal/10 p-3 text-xs text-palette-mint/70 font-mono flex items-center justify-between bg-gradient-to-r from-palette-darkblue/50 to-transparent">
         <div>TOTAL: {filteredShipments.length} SHIPMENTS</div>
         <div className="flex gap-1">
