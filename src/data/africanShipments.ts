@@ -1,50 +1,49 @@
-
 import { Shipment } from '../types/shipment';
 
 // African capital and port coordinates for realistic shipment routes
 const AFRICAN_LOCATIONS = {
   // East Africa
-  nairobi: { name: 'Nairobi, Kenya', coordinates: [36.8219, -1.2921] },
-  mombasa: { name: 'Mombasa, Kenya', coordinates: [39.6682, -4.0435] },
-  daressalaam: { name: 'Dar es Salaam, Tanzania', coordinates: [39.2083, -6.7924] },
-  kampala: { name: 'Kampala, Uganda', coordinates: [32.5899, 0.3476] },
-  addisababa: { name: 'Addis Ababa, Ethiopia', coordinates: [38.7578, 9.0222] },
-  khartoum: { name: 'Khartoum, Sudan', coordinates: [32.5599, 15.5007] },
+  nairobi: { name: 'Nairobi, Kenya', coordinates: [36.8219, -1.2921] as [number, number] },
+  mombasa: { name: 'Mombasa, Kenya', coordinates: [39.6682, -4.0435] as [number, number] },
+  daressalaam: { name: 'Dar es Salaam, Tanzania', coordinates: [39.2083, -6.7924] as [number, number] },
+  kampala: { name: 'Kampala, Uganda', coordinates: [32.5899, 0.3476] as [number, number] },
+  addisababa: { name: 'Addis Ababa, Ethiopia', coordinates: [38.7578, 9.0222] as [number, number] },
+  khartoum: { name: 'Khartoum, Sudan', coordinates: [32.5599, 15.5007] as [number, number] },
   
   // West Africa
-  dakar: { name: 'Dakar, Senegal', coordinates: [-17.4666, 14.7167] },
-  lagos: { name: 'Lagos, Nigeria', coordinates: [3.3792, 6.5244] },
-  accra: { name: 'Accra, Ghana', coordinates: [-0.1869, 5.6037] },
-  abidjan: { name: 'Abidjan, Côte d\'Ivoire', coordinates: [-4.0082, 5.3598] },
-  ouagadougou: { name: 'Ouagadougou, Burkina Faso', coordinates: [-1.5197, 12.3724] },
+  dakar: { name: 'Dakar, Senegal', coordinates: [-17.4666, 14.7167] as [number, number] },
+  lagos: { name: 'Lagos, Nigeria', coordinates: [3.3792, 6.5244] as [number, number] },
+  accra: { name: 'Accra, Ghana', coordinates: [-0.1869, 5.6037] as [number, number] },
+  abidjan: { name: 'Abidjan, Côte d\'Ivoire', coordinates: [-4.0082, 5.3598] as [number, number] },
+  ouagadougou: { name: 'Ouagadougou, Burkina Faso', coordinates: [-1.5197, 12.3724] as [number, number] },
   
   // North Africa
-  cairo: { name: 'Cairo, Egypt', coordinates: [31.2357, 30.0444] },
-  tripoli: { name: 'Tripoli, Libya', coordinates: [13.1913, 32.8872] },
-  algiers: { name: 'Algiers, Algeria', coordinates: [3.0588, 36.7538] },
-  casablanca: { name: 'Casablanca, Morocco', coordinates: [-7.5898, 33.5731] },
-  tunis: { name: 'Tunis, Tunisia', coordinates: [10.1815, 36.8065] },
+  cairo: { name: 'Cairo, Egypt', coordinates: [31.2357, 30.0444] as [number, number] },
+  tripoli: { name: 'Tripoli, Libya', coordinates: [13.1913, 32.8872] as [number, number] },
+  algiers: { name: 'Algiers, Algeria', coordinates: [3.0588, 36.7538] as [number, number] },
+  casablanca: { name: 'Casablanca, Morocco', coordinates: [-7.5898, 33.5731] as [number, number] },
+  tunis: { name: 'Tunis, Tunisia', coordinates: [10.1815, 36.8065] as [number, number] },
   
   // Southern Africa
-  johannesburg: { name: 'Johannesburg, South Africa', coordinates: [28.0473, -26.2041] },
-  capetown: { name: 'Cape Town, South Africa', coordinates: [18.4241, -33.9249] },
-  durban: { name: 'Durban, South Africa', coordinates: [31.0218, -29.8587] },
-  gaborone: { name: 'Gaborone, Botswana', coordinates: [25.9231, -24.6282] },
-  luanda: { name: 'Luanda, Angola', coordinates: [13.2343, -8.8147] },
+  johannesburg: { name: 'Johannesburg, South Africa', coordinates: [28.0473, -26.2041] as [number, number] },
+  capetown: { name: 'Cape Town, South Africa', coordinates: [18.4241, -33.9249] as [number, number] },
+  durban: { name: 'Durban, South Africa', coordinates: [31.0218, -29.8587] as [number, number] },
+  gaborone: { name: 'Gaborone, Botswana', coordinates: [25.9231, -24.6282] as [number, number] },
+  luanda: { name: 'Luanda, Angola', coordinates: [13.2343, -8.8147] as [number, number] },
   
   // Central Africa
-  kinshasa: { name: 'Kinshasa, DRC', coordinates: [15.2663, -4.4419] },
-  brazzaville: { name: 'Brazzaville, Congo', coordinates: [15.2832, -4.2634] },
-  libreville: { name: 'Libreville, Gabon', coordinates: [9.4672, 0.4162] },
-  douala: { name: 'Douala, Cameroon', coordinates: [9.7068, 4.0511] },
-  yaounde: { name: 'Yaoundé, Cameroon', coordinates: [11.5021, 3.8480] },
+  kinshasa: { name: 'Kinshasa, DRC', coordinates: [15.2663, -4.4419] as [number, number] },
+  brazzaville: { name: 'Brazzaville, Congo', coordinates: [15.2832, -4.2634] as [number, number] },
+  libreville: { name: 'Libreville, Gabon', coordinates: [9.4672, 0.4162] as [number, number] },
+  douala: { name: 'Douala, Cameroon', coordinates: [9.7068, 4.0511] as [number, number] },
+  yaounde: { name: 'Yaoundé, Cameroon', coordinates: [11.5021, 3.8480] as [number, number] },
   
   // Island Nations
-  antananarivo: { name: 'Antananarivo, Madagascar', coordinates: [47.5079, -18.8792] },
-  portlouis: { name: 'Port Louis, Mauritius', coordinates: [57.5022, -20.1609] },
-  moroni: { name: 'Moroni, Comoros', coordinates: [43.2551, -11.7172] },
-  victoria: { name: 'Victoria, Seychelles', coordinates: [55.4554, -4.6191] },
-  praia: { name: 'Praia, Cape Verde', coordinates: [-23.5125, 14.9177] }
+  antananarivo: { name: 'Antananarivo, Madagascar', coordinates: [47.5079, -18.8792] as [number, number] },
+  portlouis: { name: 'Port Louis, Mauritius', coordinates: [57.5022, -20.1609] as [number, number] },
+  moroni: { name: 'Moroni, Comoros', coordinates: [43.2551, -11.7172] as [number, number] },
+  victoria: { name: 'Victoria, Seychelles', coordinates: [55.4554, -4.6191] as [number, number] },
+  praia: { name: 'Praia, Cape Verde', coordinates: [-23.5125, 14.9177] as [number, number] }
 };
 
 // Countries for destination data
