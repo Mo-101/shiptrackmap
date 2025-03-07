@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -42,6 +43,15 @@ export default {
           DEFAULT: "#2E7D32",
           dark: "#1B5E20",
         },
+        // New color palette from image
+        palette: {
+          darkblue: "#071777", // Darkest blue
+          blue: "#0C3A62",     // Medium blue
+          teal: "#15ABC0",     // Teal blue
+          mint: "#62F3F7",     // Light mint/cyan
+          sage: "#76A6B4",     // Sage blue/gray
+          sand: "#DCCC82",     // Sand/beige
+        }
       },
       keyframes: {
         "fade-in": {
@@ -52,10 +62,15 @@ export default {
           "0%": { transform: "translateX(-100%)" },
           "100%": { transform: "translateX(0)" },
         },
+        "pulse-opacity": {
+          "0%, 100%": { opacity: "0.6" },
+          "50%": { opacity: "0.2" },
+        },
       },
       animation: {
         "fade-in": "fade-in 0.5s ease-out",
         "slide-in": "slide-in 0.5s ease-out",
+        "pulse-opacity": "pulse-opacity 2s ease-in-out infinite",
       },
     },
   },

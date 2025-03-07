@@ -41,22 +41,22 @@ const WeatherInfo: React.FC<WeatherInfoProps> = ({ location, onClose }) => {
   const getWeatherIcon = (weatherMain: string) => {
     switch (weatherMain.toLowerCase()) {
       case 'clear':
-        return <WiDaySunny className="text-yellow-400 text-3xl" />;
+        return <WiDaySunny className="text-palette-sand text-3xl" />;
       case 'rain':
-        return <WiRain className="text-blue-400 text-3xl" />;
+        return <WiRain className="text-palette-mint text-3xl" />;
       case 'clouds':
-        return <WiCloudy className="text-gray-400 text-3xl" />;
+        return <WiCloudy className="text-palette-sage text-3xl" />;
       case 'thunderstorm':
-        return <WiDayThunderstorm className="text-purple-400 text-3xl" />;
+        return <WiDayThunderstorm className="text-palette-teal text-3xl" />;
       case 'snow':
-        return <WiSnow className="text-blue-200 text-3xl" />;
+        return <WiSnow className="text-palette-mint text-3xl" />;
       default:
-        return <WiDaySunny className="text-yellow-400 text-3xl" />;
+        return <WiDaySunny className="text-palette-sand text-3xl" />;
     }
   };
 
   return (
-    <div className="absolute top-4 right-4 bg-black/80 backdrop-blur-sm text-white p-4 rounded-lg shadow-xl animate-fade-in w-64 border border-cyan-500/20">
+    <div className="absolute top-4 left-4 sm:left-auto sm:right-4 bg-palette-darkblue/80 backdrop-blur-sm text-white p-4 rounded-lg shadow-xl animate-fade-in w-64 border border-palette-teal/30">
       <button 
         onClick={onClose}
         className="absolute top-2 right-2 text-white/60 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors"
@@ -64,15 +64,15 @@ const WeatherInfo: React.FC<WeatherInfoProps> = ({ location, onClose }) => {
         <X size={16} />
       </button>
       
-      <h3 className="text-lg font-semibold mb-2 text-cyan-300">Weather Information</h3>
-      <p className="text-sm mb-1 text-cyan-100/70 font-mono">
+      <h3 className="text-lg font-semibold mb-2 text-palette-mint">Weather Information</h3>
+      <p className="text-sm mb-1 text-palette-teal/80 font-mono">
         [{location[0].toFixed(2)}, {location[1].toFixed(2)}]
       </p>
       
       {isLoading ? (
         <div className="flex items-center justify-center py-6">
-          <div className="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-          <span className="ml-2 text-cyan-200">Loading data...</span>
+          <div className="w-5 h-5 border-2 border-palette-mint border-t-transparent rounded-full animate-spin"></div>
+          <span className="ml-2 text-palette-mint">Loading data...</span>
         </div>
       ) : weather ? (
         <div className="space-y-3 mt-4">
@@ -81,18 +81,21 @@ const WeatherInfo: React.FC<WeatherInfoProps> = ({ location, onClose }) => {
             <span className="text-lg font-semibold">{weather.main.temp.toFixed(1)}°C</span>
             <span className="text-sm text-gray-300">({weather.weather[0].description})</span>
           </div>
-          <div className="flex items-center space-x-2 text-cyan-200">
-            <WiHumidity className="text-blue-400 text-2xl" />
+          <div className="flex items-center space-x-2 text-palette-mint">
+            <WiHumidity className="text-palette-mint text-2xl" />
             <span>{weather.main.humidity}% Humidity</span>
           </div>
-          <div className="flex items-center space-x-2 text-cyan-200">
-            <WiStrongWind className="text-gray-400 text-2xl" />
+          <div className="flex items-center space-x-2 text-palette-mint">
+            <WiStrongWind className="text-palette-teal text-2xl" />
             <span>{weather.wind.speed} m/s Winds</span>
           </div>
         </div>
       ) : (
         <div className="text-center py-4 text-red-400">Failed to load weather data</div>
       )}
+      
+      {/* Decorative elements */}
+      <div className="absolute -z-10 top-0 right-0 w-24 h-24 rounded-full bg-palette-teal/5 animate-pulse-opacity"></div>
     </div>
   );
 };

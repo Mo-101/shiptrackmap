@@ -115,7 +115,7 @@ const MOCK_SHIPMENTS: Shipment[] = [
   {
     id: '6',
     name: 'Dakar-Cameroon Route',
-    type: 'charter',
+    type: 'truck',
     origin: {
       name: 'Dakar, Senegal',
       coordinates: [-17.4666, 14.7167],
@@ -155,7 +155,7 @@ const Index = () => {
       <Route
         path="/"
         element={
-          <div className="h-screen w-screen flex bg-zinc-950">
+          <div className="h-screen w-screen flex bg-palette-darkblue">
             <ShipmentList
               shipments={MOCK_SHIPMENTS}
               activeShipment={activeShipment}
