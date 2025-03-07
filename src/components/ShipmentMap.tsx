@@ -44,7 +44,18 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
         onShipmentHover={setHoveredShipment}
       />
       
-      <MapAnimations map={map} />
+      {/* Pass required routeProps to MapAnimations */}
+      {map && <MapAnimations 
+        map={map} 
+        routeProps={{
+          routes: shipments.map(shipment => ({
+            source: shipment.origin.coordinates as [number, number],
+            destination: shipment.destination.coordinates as [number, number],
+            type: shipment.type
+          }))
+        }} 
+      />}
+      
       <MapHUD shipments={shipments} />
       
       {hoveredShipment && (

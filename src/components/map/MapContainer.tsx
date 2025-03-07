@@ -15,10 +15,11 @@ const MapContainer: React.FC<MapContainerProps> = ({ onMapLoad }) => {
   useEffect(() => {
     if (!mapContainer.current) return;
 
+    // Fix TypeScript error by explicitly typing center as [number, number]
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: MAPBOX_STYLE,
-      center: MAP_INITIAL_CONFIG.center,
+      center: MAP_INITIAL_CONFIG.center as [number, number],
       zoom: MAP_INITIAL_CONFIG.zoom,
       pitch: MAP_INITIAL_CONFIG.pitch,
       projection: MAP_INITIAL_CONFIG.projection
@@ -40,10 +41,10 @@ const MapContainer: React.FC<MapContainerProps> = ({ onMapLoad }) => {
 
 const setupMapEffects = (map: mapboxgl.Map) => {
   map.setFog({
-    color: 'rgb(7, 23, 119)',
-    'high-color': 'rgb(12, 58, 98)',
+    color: 'rgb(27, 36, 58)', // Darker blue for a more professional look
+    'high-color': 'rgb(36, 47, 73)',
     'horizon-blend': 0.4,
-    'space-color': 'rgb(7, 16, 60)',
+    'space-color': 'rgb(11, 22, 39)',
     'star-intensity': 0.8
   });
 

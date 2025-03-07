@@ -53,13 +53,14 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Updated palette based on the provided colors
         palette: {
-          darkblue: "#071077",
-          blue: "#0C3A62",
-          teal: "#15ABC0",
-          mint: "#62F3F7",
-          sage: "#91A0A9",
-          sand: "#DCCC82"
+          darkblue: "#1B243A", // Dark blue from color scheme
+          midblue: "#4C4389", // Purple-ish blue
+          teal: "#4FA3BA",    // Teal blue
+          mint: "#4FF2F8",    // Bright teal
+          sage: "#91A0A9",    // Sage gray
+          sand: "#DCCC82"     // Sand color (kept from original)
         },
       },
       borderRadius: {
@@ -96,6 +97,10 @@ export default {
           "0%": { backgroundPosition: "0% 50%" },
           "50%": { backgroundPosition: "100% 50%" },
           "100%": { backgroundPosition: "0% 50%" }
+        },
+        "arc-animation": {
+          "0%": { strokeDashoffset: "1000" },
+          "100%": { strokeDashoffset: "0" }
         }
       },
       animation: {
@@ -104,7 +109,8 @@ export default {
         "scanner": "scanner 10s linear infinite",
         "blink": "blink 1.5s infinite",
         "pulse-opacity": "pulse-opacity 2s infinite",
-        "gradient-shift": "gradient-shift 6s ease infinite"
+        "gradient-shift": "gradient-shift 6s ease infinite",
+        "arc-animation": "arc-animation 3s ease-out forwards"
       },
     },
   },

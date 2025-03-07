@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -11,19 +12,23 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221 100% 36%;
+    
+    /* New color scheme based on the provided palette */
+    --primary: 219 54% 28%;       /* #1B243A - Dark blue */
     --primary-foreground: 210 40% 98%;
-    --secondary: 199 100% 44%;
+    --secondary: 183 71% 44%;     /* #4FA3BA - Teal */
     --secondary-foreground: 210 40% 98%;
+    
+    --accent: 175 88% 55%;        /* #4FF2F8 - Bright teal */
+    --accent-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 221 100% 36%;
+    --ring: 221 43% 28%;
     --radius: 0.5rem;
   }
 
@@ -56,5 +61,26 @@
   
   .scrollbar-hide::-webkit-scrollbar {
     display: none;  /* Chrome, Safari and Opera */
+  }
+  
+  /* New utility classes for the updated design */
+  .glass-panel {
+    @apply bg-primary/80 backdrop-blur-md border border-secondary/30;
+  }
+  
+  .data-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+  }
+  
+  .data-card {
+    @apply bg-primary/90 backdrop-blur-md p-4 rounded-lg border border-secondary/20 shadow-lg;
+  }
+  
+  .animated-border {
+    @apply relative after:absolute after:inset-0 after:border after:border-accent/50 after:rounded-lg after:animate-pulse;
+  }
+  
+  .scanner-line {
+    @apply absolute h-[2px] bg-accent/70 animate-scanner pointer-events-none;
   }
 }
