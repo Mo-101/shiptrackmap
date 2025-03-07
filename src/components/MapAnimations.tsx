@@ -1,7 +1,7 @@
 
 import mapboxgl from 'mapbox-gl';
 
-// Fix the TypeScript error by changing the property name
+// Create animated line for tracking routes
 export const createLineAnimation = (map: mapboxgl.Map) => {
   try {
     map.addSource('animated-line-source', {
@@ -81,6 +81,5 @@ export const updateLineAnimation = (map: mapboxgl.Map, coordinates: [number, num
   }
 };
 
-// Create a default export that includes the named exports
-const MapAnimations = { createLineAnimation, updateLineAnimation };
-export default MapAnimations;
+// Export the functions
+export default { createLineAnimation, updateLineAnimation };
