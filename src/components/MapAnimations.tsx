@@ -1,3 +1,4 @@
+
 import mapboxgl from 'mapbox-gl';
 
 // Fix the TypeScript error by changing the property name
@@ -30,21 +31,31 @@ export const createLineAnimation = (map: mapboxgl.Map) => {
         'line-color': '#4FF2F8',
         'line-width': 3,
         'line-opacity': 0.8,
-        // Change from 'line-dash-offset' to 'line-dasharray' which is supported 
         'line-dasharray': [2, 1]
       }
     });
 
     // Animate the line
     let counter = 0;
-    setInterval(() => {
-      counter = (counter + 1) % 200;
+    let lastTime = 0;
+    
+    const animate = (currentTime: number) => {
+      if (lastTime === 0) lastTime = currentTime;
+      const deltaTime = currentTime - lastTime;
+      lastTime = currentTime;
+      
+      counter = (counter + (deltaTime * 0.05)) % 200;
+      
       map.setPaintProperty(
         'animated-line-layer',
         'line-dasharray',
         [counter / 2, 2 - (counter / 2)]
       );
-    }, 20);
+      
+      requestAnimationFrame(animate);
+    };
+    
+    requestAnimationFrame(animate);
   } catch (error) {
     console.error('Error creating line animation:', error);
   }
@@ -52,15 +63,24 @@ export const createLineAnimation = (map: mapboxgl.Map) => {
 
 export const updateLineAnimation = (map: mapboxgl.Map, coordinates: [number, number][]) => {
   try {
-    map.getSource('animated-line-source')?.setData({
-      type: 'Feature',
-      properties: {},
-      geometry: {
-        type: 'LineString',
-        coordinates: coordinates
-      }
-    });
+    // Use type assertion to tell TypeScript that this is a GeoJSONSource
+    const source = map.getSource('animated-line-source') as mapboxgl.GeoJSONSource;
+    
+    if (source) {
+      source.setData({
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'LineString',
+          coordinates: coordinates
+        }
+      });
+    }
   } catch (error) {
     console.error('Error updating line animation:', error);
   }
 };
+
+// Create a default export that includes the named exports
+const MapAnimations = { createLineAnimation, updateLineAnimation };
+export default MapAnimations;
