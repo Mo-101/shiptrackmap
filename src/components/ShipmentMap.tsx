@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Shipment } from '../types/shipment';
 import WeatherInfo from './WeatherInfo';
 import ShipmentTooltip from './ShipmentTooltip';
@@ -33,6 +33,13 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
     updateShipmentData(map, shipments, activeShipment);
   }, [shipments, activeShipment, mapLoaded, map]);
 
+  // Create animation when map is loaded
+  useEffect(() => {
+    if (map) {
+      MapAnimations.createLineAnimation(map);
+    }
+  }, [map]);
+
   return (
     <div className="relative w-full h-full">
       <MapContainer onMapLoad={handleMapLoad} />
@@ -43,9 +50,6 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
         onLocationSelect={setSelectedLocation}
         onShipmentHover={setHoveredShipment}
       />
-      
-      {/* Pass required routeProps to MapAnimations */}
-      {map && <MapAnimations.createLineAnimation map={map} />}
       
       <MapHUD shipments={shipments} />
       
