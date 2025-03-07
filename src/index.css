@@ -83,4 +83,25 @@
   .scanner-line {
     @apply absolute h-[2px] bg-accent/80 left-0 right-0 animate-scanner pointer-events-none;
   }
+
+  /* New utility classes for the pricing-table-style cards */
+  .price-card {
+    @apply relative bg-white rounded-3xl overflow-hidden shadow-xl transition-transform hover:scale-105;
+  }
+  
+  .price-card-header {
+    @apply p-6 flex flex-col items-center text-white;
+  }
+  
+  .price-card-content {
+    @apply p-6 bg-white space-y-4;
+  }
+  
+  .feature-item {
+    @apply flex items-start space-x-2 text-gray-800;
+  }
+  
+  .cta-button {
+    @apply mt-4 w-full py-2 px-4 text-white rounded-md transition-colors font-medium;
+  }
 }

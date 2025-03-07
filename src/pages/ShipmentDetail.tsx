@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Package, Warehouse, FileText, Calendar, Weight, Database, DollarSign, Box, Truck, ArrowLeft, MapPin, Clock, Ship, Plane } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Package, Warehouse, FileText, Calendar, Weight, Database, DollarSign, Box, Truck, ArrowLeft, MapPin, Clock, Ship, Plane, Check } from 'lucide-react';
 import { Card } from "@/components/ui/card";
 import { Shipment } from '../types/shipment';
 
@@ -11,6 +11,7 @@ interface ShipmentDetailProps {
 
 const ShipmentDetail: React.FC<ShipmentDetailProps> = ({ shipment }) => {
   const { id } = useParams();
+  const navigate = useNavigate();
   
   if (!shipment) return (
     <div className="flex items-center justify-center min-h-screen bg-zinc-950">
@@ -26,20 +27,47 @@ const ShipmentDetail: React.FC<ShipmentDetailProps> = ({ shipment }) => {
     </div>
   );
 
-  const details = [
-    { icon: <Package className="w-5 h-5" />, label: "Tracking Number", value: shipment.id, color: "bg-cyan-950" },
-    { icon: <Warehouse className="w-5 h-5" />, label: "Warehouse", value: "Main Warehouse", color: "bg-blue-950" },
-    { icon: <FileText className="w-5 h-5" />, label: "Stock Release (SR)", value: "SR-2024-001", color: "bg-indigo-950" },
-    { icon: <Box className="w-5 h-5" />, label: "WHO Description", value: "Medical Supplies", color: "bg-violet-950" },
-    { icon: <Truck className="w-5 h-5" />, label: "Item Description", value: shipment.itemDescription, color: "bg-cyan-950" },
-    { icon: <Calendar className="w-5 h-5" />, label: "Expiration Date", value: "2025-12-31", color: "bg-blue-950" },
-    { icon: <Weight className="w-5 h-5" />, label: "Weight", value: shipment.weight, color: "bg-indigo-950" },
-    { icon: <Database className="w-5 h-5" />, label: "Volume", value: "500 m³", color: "bg-violet-950" },
-    { icon: <DollarSign className="w-5 h-5" />, label: "Value", value: "$50,000", color: "bg-cyan-950" }
+  // Categorize shipment details for the cards
+  const basicDetails = [
+    { icon: <Check className="w-4 h-4 text-green-500" />, label: `Tracking ID: ${shipment.id}` },
+    { icon: <Check className="w-4 h-4 text-green-500" />, label: `Status: ${shipment.status}` },
+    { icon: <Check className="w-4 h-4 text-green-500" />, label: `Type: ${shipment.type === 'ship' ? 'Sea Freight' : shipment.type === 'charter' ? 'Air Freight' : 'Land Transport'}` },
+    { icon: <Check className="w-4 h-4 text-green-500" />, label: `ETA: ${shipment.eta}` },
   ];
 
+  const proDetails = [
+    { icon: <Check className="w-4 h-4 text-green-500" />, label: `Weight: ${shipment.weight}` },
+    { icon: <Check className="w-4 h-4 text-green-500" />, label: `Value: ${shipment.value || 'N/A'}` },
+    { icon: <Check className="w-4 h-4 text-green-500" />, label: `Volume: ${shipment.volume || 'N/A'}` },
+    { icon: <Check className="w-4 h-4 text-green-500" />, label: `Consignee: At ${shipment.consigneeAddress}` },
+    { icon: <Check className="w-4 h-4 text-green-500" />, label: `Items: ${shipment.itemDescription}` },
+  ];
+
+  const plusDetails = [
+    { icon: <Check className="w-4 h-4 text-green-500" />, label: `Origin: ${shipment.origin.name}` },
+    { icon: <Check className="w-4 h-4 text-green-500" />, label: `Destination: ${shipment.destination.name}, ${shipment.destination.country}` },
+    { icon: <Check className="w-4 h-4 text-green-500" />, label: `Category: ${shipment.itemCategory}` },
+    { icon: <Check className="w-4 h-4 text-green-500" />, label: `WHO Description: ${shipment.whoDescription || 'Standard Shipment'}` },
+    { icon: <Check className="w-4 h-4 text-green-500" />, label: `Stock Release: ${shipment.stockRelease || 'N/A'}` },
+    { icon: <Check className="w-4 h-4 text-green-500" />, label: `Expiration: ${shipment.expirationDate || 'N/A'}` },
+  ];
+
+  // Define card styling based on shipment type
+  const getCardGradient = () => {
+    switch (shipment.type) {
+      case 'ship':
+        return 'from-blue-600 to-blue-400';
+      case 'charter':
+        return 'from-purple-600 to-purple-400';
+      case 'truck':
+        return 'from-cyan-600 to-cyan-400';
+      default:
+        return 'from-gray-600 to-gray-400';
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-zinc-950 text-white p-8 animate-fade-in">
+    <div className="min-h-screen bg-zinc-950 text-white p-4 md:p-8 animate-fade-in">
       <Link 
         to="/" 
         className="inline-flex items-center text-cyan-400 hover:text-cyan-300 transition-colors mb-8 group"
@@ -48,85 +76,118 @@ const ShipmentDetail: React.FC<ShipmentDetailProps> = ({ shipment }) => {
         Back to Dashboard
       </Link>
       
-      <div className="flex flex-col md:flex-row gap-6 mb-8">
-        <div className="bg-black/50 backdrop-blur-md p-6 rounded-lg border border-cyan-500/20 flex-1">
-          <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
-            <Package className="w-8 h-8 text-cyan-400" />
-            {shipment.name}
-          </h1>
-          
-          <div className="flex items-center gap-2 mt-4">
-            {shipment.type === 'ship' ? (
-              <Ship className="text-cyan-400" />
-            ) : (
-              <Plane className="text-violet-400" />
-            )}
-            <span className="text-lg font-medium">{shipment.type === 'ship' ? 'Sea Freight' : 'Air Freight'}</span>
-            
-            <span className={`ml-auto text-sm px-3 py-1 rounded-full ${
-              shipment.status === 'in-transit' 
-                ? 'bg-amber-500/20 text-amber-300' 
-                : shipment.status === 'delivered' 
-                  ? 'bg-green-500/20 text-green-300'
-                  : 'bg-red-500/20 text-red-300'
-            }`}>
-              {shipment.status}
-            </span>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
+          {shipment.type === 'ship' ? (
+            <Ship className="w-8 h-8 text-cyan-400" />
+          ) : shipment.type === 'charter' ? (
+            <Plane className="w-8 h-8 text-purple-400" />
+          ) : (
+            <Truck className="w-8 h-8 text-blue-400" />
+          )}
+          {shipment.name}
+        </h1>
+        <p className="text-gray-400">Shipment details and tracking information</p>
+      </div>
+      
+      {/* Pricing-table style cards for shipment details */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Basic Details Card */}
+        <div className="bg-white rounded-3xl overflow-hidden shadow-xl transform transition-all hover:scale-105">
+          <div className={`bg-gradient-to-r ${getCardGradient()} p-4 flex flex-col items-center justify-center h-40`}>
+            <span className="text-white text-xs uppercase tracking-wider mb-1">Basic Details</span>
+            <h2 className="text-3xl font-bold text-white mb-2">Tracking</h2>
+            <div className="text-white/80 text-xl font-medium">{shipment.id}</div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-            <div className="space-y-2">
-              <div className="flex items-start gap-2">
-                <MapPin className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                <div>
-                  <div className="text-sm text-gray-400">Origin</div>
-                  <div className="font-medium">{shipment.origin.name}</div>
-                </div>
+          <div className="bg-white p-6 space-y-4">
+            {basicDetails.map((detail, index) => (
+              <div key={index} className="flex items-start space-x-2">
+                {detail.icon}
+                <span className="text-gray-800">{detail.label}</span>
               </div>
-              
-              <div className="flex items-start gap-2">
-                <Clock className="w-5 h-5 text-cyan-400 mt-0.5 flex-shrink-0" />
-                <div>
-                  <div className="text-sm text-gray-400">Estimated Time of Arrival</div>
-                  <div className="font-medium">{shipment.eta}</div>
-                </div>
-              </div>
-            </div>
+            ))}
             
-            <div className="space-y-2">
-              <div className="flex items-start gap-2">
-                <MapPin className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
-                <div>
-                  <div className="text-sm text-gray-400">Destination</div>
-                  <div className="font-medium">{shipment.destination.name}, {shipment.destination.country}</div>
-                </div>
+            <button 
+              onClick={() => window.open(`https://www.google.com/maps/dir/${shipment.origin.coordinates[1]},${shipment.origin.coordinates[0]}/${shipment.destination.coordinates[1]},${shipment.destination.coordinates[0]}`, '_blank')}
+              className="mt-4 w-full py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors font-medium"
+            >
+              Track Route
+            </button>
+          </div>
+        </div>
+        
+        {/* Pro Details Card */}
+        <div className="bg-white rounded-3xl overflow-hidden shadow-xl transform transition-all hover:scale-105">
+          <div className="bg-gradient-to-r from-cyan-500 to-cyan-300 p-4 flex flex-col items-center justify-center h-40">
+            <span className="text-white text-xs uppercase tracking-wider mb-1">Shipping Details</span>
+            <h2 className="text-3xl font-bold text-white mb-2">Cargo</h2>
+            <div className="text-white/80 text-xl font-medium">{shipment.itemCategory}</div>
+          </div>
+          
+          <div className="bg-white p-6 space-y-4">
+            {proDetails.map((detail, index) => (
+              <div key={index} className="flex items-start space-x-2">
+                {detail.icon}
+                <span className="text-gray-800">{detail.label}</span>
               </div>
-              
-              <div className="flex items-start gap-2">
-                <Box className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
-                <div>
-                  <div className="text-sm text-gray-400">Consignee Address</div>
-                  <div className="font-medium">{shipment.consigneeAddress}</div>
-                </div>
+            ))}
+            
+            <button 
+              onClick={() => navigate(`/shipment/${Number(id) > 1 ? Number(id) - 1 : id}`)}
+              className="mt-4 w-full py-2 px-4 bg-cyan-500 text-white rounded-md hover:bg-cyan-600 transition-colors font-medium"
+            >
+              Previous Shipment
+            </button>
+          </div>
+        </div>
+        
+        {/* Plus Details Card */}
+        <div className="bg-white rounded-3xl overflow-hidden shadow-xl transform transition-all hover:scale-105">
+          <div className="bg-gradient-to-r from-purple-500 to-purple-300 p-4 flex flex-col items-center justify-center h-40">
+            <span className="text-white text-xs uppercase tracking-wider mb-1">Advanced Details</span>
+            <h2 className="text-3xl font-bold text-white mb-2">Complete</h2>
+            <div className="text-white/80 text-xl font-medium">Info Package</div>
+          </div>
+          
+          <div className="bg-white p-6 space-y-4">
+            {plusDetails.map((detail, index) => (
+              <div key={index} className="flex items-start space-x-2">
+                {detail.icon}
+                <span className="text-gray-800">{detail.label}</span>
               </div>
-            </div>
+            ))}
+            
+            <button 
+              onClick={() => navigate(`/shipment/${Number(id) < 20 ? Number(id) + 1 : id}`)}
+              className="mt-4 w-full py-2 px-4 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors font-medium"
+            >
+              Next Shipment
+            </button>
           </div>
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {details.map((detail, index) => (
-          <Card key={index} className={`${detail.color} border-none p-6 hover:shadow-lg hover:shadow-cyan-500/5 transition-shadow group overflow-hidden relative`}>
-            <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-cyan-400/5 group-hover:bg-cyan-400/10 transition-colors"></div>
-            <div className="flex items-start gap-4 relative z-10">
-              <div className="text-cyan-300 bg-cyan-950 p-2 rounded-lg">{detail.icon}</div>
-              <div>
-                <p className="text-sm text-gray-400">{detail.label}</p>
-                <p className="font-semibold text-lg text-white">{detail.value}</p>
-              </div>
-            </div>
-          </Card>
-        ))}
+      {/* Additional shipping notes or status updates */}
+      <div className="bg-black/30 backdrop-blur-sm border border-gray-800 rounded-lg p-6 mb-8">
+        <h3 className="text-xl font-medium text-white mb-4 flex items-center gap-2">
+          <Package className="w-5 h-5 text-cyan-400" />
+          Shipping Notes
+        </h3>
+        <div className="space-y-2 text-gray-300">
+          <p className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-cyan-400" />
+            Last updated: {new Date().toLocaleDateString()}
+          </p>
+          <p className="flex items-center gap-2">
+            <Box className="w-4 h-4 text-purple-400" />
+            Operated by: {shipment.ops || 'Logistics Team'}
+          </p>
+          <p className="flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-red-400" />
+            Current location: {shipment.status === 'in-transit' ? 'In Transit' : shipment.status === 'delivered' ? shipment.destination.name : 'Processing Center'}
+          </p>
+        </div>
       </div>
       
       {/* High-tech decorative elements */}
