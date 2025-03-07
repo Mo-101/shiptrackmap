@@ -35,21 +35,15 @@ export const createLineAnimation = (map: mapboxgl.Map) => {
       }
     });
 
-    // Animate the line
-    let counter = 0;
-    let lastTime = 0;
-    
-    const animate = (currentTime: number) => {
-      if (lastTime === 0) lastTime = currentTime;
-      const deltaTime = currentTime - lastTime;
-      lastTime = currentTime;
-      
-      counter = (counter + (deltaTime * 0.05)) % 200;
+    // Animate the line with a fixed pattern to avoid negative values
+    const animate = () => {
+      // Use a pattern that ensures both values remain positive
+      const offset = (Date.now() / 100) % 4;
       
       map.setPaintProperty(
         'animated-line-layer',
         'line-dasharray',
-        [counter / 2, 2 - (counter / 2)]
+        [2, Math.max(1, (2 - offset % 2))] // Ensure second value is always positive
       );
       
       requestAnimationFrame(animate);

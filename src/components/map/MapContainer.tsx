@@ -57,11 +57,11 @@ const MapContainer: React.FC<MapContainerProps> = ({ onMapLoad }) => {
 
 const setupMapEffects = (map: mapboxgl.Map) => {
   map.setFog({
-    color: 'rgb(18, 28, 48)', // Much darker blue for a professional look
-    'high-color': 'rgb(27, 36, 58)',
-    'horizon-blend': 0.3,
-    'space-color': 'rgb(5, 12, 28)',
-    'star-intensity': 0.7
+    color: 'rgb(7, 23, 59)', // Darker blue for a futuristic look
+    'high-color': 'rgb(12, 38, 78)',
+    'horizon-blend': 0.4,
+    'space-color': 'rgb(3, 9, 33)',
+    'star-intensity': 0.8
   });
 
   map.addLayer({
@@ -70,9 +70,20 @@ const setupMapEffects = (map: mapboxgl.Map) => {
     paint: {
       'sky-type': 'atmosphere',
       'sky-atmosphere-sun': [0.0, 90.0],
-      'sky-atmosphere-sun-intensity': 15
+      'sky-atmosphere-sun-intensity': 18,
+      'sky-atmosphere-color': 'rgba(12, 38, 78, 1)'
     }
   });
+
+  // Add a subtle globe rotation for enhanced visual effect
+  const rotateCamera = (timestamp: number) => {
+    // Rotate very slowly
+    map.rotateTo((timestamp / 1000) * 0.5 % 360, { duration: 0 });
+    requestAnimationFrame(rotateCamera);
+  };
+
+  // Uncomment this to enable rotation (disabled by default as it can be disorienting)
+  // requestAnimationFrame(rotateCamera);
 };
 
 export default MapContainer;
