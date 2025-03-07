@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import * as turf from '@turf/turf';
@@ -40,7 +41,7 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       container: mapContainer.current,
       style: 'mapbox://styles/akanimo1/clcgr62o0003c14mr8b0xg3cn',
       center: [20, 5],
-      zoom: 2,
+      zoom: 1.8,
       pitch: 45,
       projection: 'mercator'
     });
@@ -72,10 +73,10 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       map.current?.addSource('grid', {
         type: 'geojson',
         data: {
-          type: 'Feature',
+          type: 'Feature' as const,
           properties: {},
           geometry: {
-            type: 'Polygon',
+            type: 'Polygon' as const,
             coordinates: [
               [
                 [-180, -90],
@@ -129,7 +130,8 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
           paint: {
             'line-color': ['case', ['boolean', ['get', 'active'], false], lineColor, `${lineColor}99`],
             'line-width': ['case', ['boolean', ['get', 'active'], false], lineWidth + 1, lineWidth],
-            'line-opacity': 0.8
+            'line-opacity': 0.8,
+            'line-dasharray': type === 'ship' ? [0.5, 1, 2, 1] : type === 'charter' ? [1, 3] : [0.5, 1.5]
           },
         });
 
@@ -252,42 +254,23 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       }
       
       // Update each route type with different animations
-      if (routeProps.current['ship']) {
-        const shipOffset = (routeProps.current['ship'].dashOffset + 0.2) % 8;
-        routeProps.current['ship'].dashOffset = shipOffset;
-        
-        if (map.current.getLayer('routes-ship')) {
-          map.current.setPaintProperty('routes-ship', 'line-dasharray', [0.5, 1, 2, 1]);
-          // Using a custom property as TypeScript doesn't recognize 'line-dash-offset'
-          (map.current as any).setPaintProperty('routes-ship', 'line-dasharray-offset', shipOffset);
+      ['ship', 'charter', 'truck'].forEach(type => {
+        if (routeProps.current[type]) {
+          // Different speeds for different types
+          const speed = type === 'ship' ? 0.2 : type === 'charter' ? 0.4 : 0.3;
+          routeProps.current[type].dashOffset = (routeProps.current[type].dashOffset + speed) % 8;
+          
+          if (map.current?.getLayer(`routes-${type}`)) {
+            // Using setPaintProperty for 'line-dash-offset'
+            (map.current as any).setPaintProperty(`routes-${type}`, 'line-dash-offset', 
+              routeProps.current[type].dashOffset);
+          }
         }
-      }
-      
-      if (routeProps.current['charter']) {
-        const charterOffset = (routeProps.current['charter'].dashOffset + 0.4) % 8;
-        routeProps.current['charter'].dashOffset = charterOffset;
-        
-        if (map.current.getLayer('routes-charter')) {
-          map.current.setPaintProperty('routes-charter', 'line-dasharray', [1, 3]);
-          // Using a custom property as TypeScript doesn't recognize 'line-dash-offset'
-          (map.current as any).setPaintProperty('routes-charter', 'line-dasharray-offset', charterOffset);
-        }
-      }
-      
-      if (routeProps.current['truck']) {
-        const truckOffset = (routeProps.current['truck'].dashOffset + 0.3) % 8;
-        routeProps.current['truck'].dashOffset = truckOffset;
-        
-        if (map.current.getLayer('routes-truck')) {
-          map.current.setPaintProperty('routes-truck', 'line-dasharray', [0.5, 1.5]);
-          // Using a custom property as TypeScript doesn't recognize 'line-dash-offset'
-          (map.current as any).setPaintProperty('routes-truck', 'line-dasharray-offset', truckOffset);
-        }
-      }
+      });
       
       // Pulse animation for points
       const pulseSize = 5 + Math.sin(Date.now() / 500) * 5; // Pulsing radius
-      if (map.current.getLayer('points-pulse')) {
+      if (map.current?.getLayer('points-pulse')) {
         map.current.setPaintProperty('points-pulse', 'circle-radius', 
           ['case', 
             ['boolean', ['get', 'active'], false], 
@@ -324,66 +307,83 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       
       const isActive = activeShipment?.id === shipment.id;
       
-      // Create a curved line for air routes (charter)
-      if (shipment.type === 'charter') {
-        // Create a curved arc for flights
-        const midPoint = turf.midpoint(
-          turf.point(start),
-          turf.point(end)
-        );
-        
-        // Add elevation to create an arc
-        const midCoord = midPoint.geometry.coordinates;
-        const distance = turf.distance(turf.point(start), turf.point(end), { units: 'kilometers' });
-        const elevation = Math.min(distance * 0.1, 100); // Limit max height
-        
-        midCoord[2] = elevation;
-        
-        // Create a bezier curve
-        const line = turf.bezierSpline(turf.lineString([
-          start,
-          midCoord,
-          end
-        ]), { sharpness: 0.8 });
-        
-        // Add properties
-        line.properties = { 
-          active: isActive,
-          shipmentId: shipment.id, 
-          type: shipment.type
-        };
-        
-        charterRoutes.push(line);
-      } 
-      // Create slightly curved lines for sea routes (ship)
-      else if (shipment.type === 'ship') {
-        const line = turf.greatCircle(
+      // Create curved arcs for all shipment types - more pronounced for air and sea
+      const createArcRoute = (type: 'ship' | 'charter' | 'truck') => {
+        // Calculate distance for proper arc height
+        const distance = turf.distance(
           turf.point(start),
           turf.point(end),
-          { 
-            properties: { 
-              active: isActive,
-              shipmentId: shipment.id, 
-              type: shipment.type
-            },
-            npoints: 100
-          }
+          { units: 'kilometers' }
         );
         
-        shipRoutes.push(line);
-      }
-      // Create straight lines for ground routes (truck)
-      else if (shipment.type === 'truck') {
-        const line = turf.lineString(
-          [start, end],
-          { 
+        // Different arc heights based on type and distance
+        let arcHeight: number;
+        const baseHeight = distance * 0.005;
+        
+        if (type === 'charter') {
+          // High arcs for air freight
+          arcHeight = Math.min(baseHeight * 20, 200); 
+        } else if (type === 'ship') {
+          // Medium arcs for sea freight
+          arcHeight = Math.min(baseHeight * 10, 100);
+        } else {
+          // Low arcs for ground transport
+          arcHeight = Math.min(baseHeight * 3, 30);
+        }
+        
+        // Create a curved arc by adding control points
+        // First, find the midpoint
+        const midCoord: [number, number] = [
+          (start[0] + end[0]) / 2,
+          (start[1] + end[1]) / 2
+        ];
+        
+        // Create a bezier curve with elevated control points
+        const points = [];
+        points.push(start);
+        
+        // Add control points for the curve - more points = smoother curve
+        const steps = Math.max(Math.ceil(distance / 500), 8); // More points for longer distances
+        
+        for (let i = 1; i < steps - 1; i++) {
+          const ratio = i / steps;
+          const x = start[0] + (end[0] - start[0]) * ratio;
+          const y = start[1] + (end[1] - start[1]) * ratio;
+          
+          // Create arc by modifying height at each point
+          // Sine wave distribution for smooth arcs
+          const heightFactor = Math.sin(ratio * Math.PI);
+          const elevation = arcHeight * heightFactor;
+          
+          points.push([x, y]);
+        }
+        
+        points.push(end);
+        
+        // Create a curved line with the points
+        const line = {
+          type: 'Feature' as const,
+          geometry: {
+            type: 'LineString' as const,
+            coordinates: points
+          },
+          properties: { 
             active: isActive,
             shipmentId: shipment.id, 
             type: shipment.type
           }
-        );
+        };
         
-        truckRoutes.push(line);
+        return line;
+      };
+      
+      // Create appropriate route based on shipment type
+      if (shipment.type === 'charter') {
+        charterRoutes.push(createArcRoute('charter'));
+      } else if (shipment.type === 'ship') {
+        shipRoutes.push(createArcRoute('ship'));
+      } else if (shipment.type === 'truck') {
+        truckRoutes.push(createArcRoute('truck'));
       }
     });
 
@@ -549,4 +549,3 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
 };
 
 export default ShipmentMap;
-
