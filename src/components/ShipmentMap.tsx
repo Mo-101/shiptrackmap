@@ -411,14 +411,14 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
     }
     
     // Create point features for origins and destinations
-    const pointFeatures = shipments.flatMap((shipment) => {
+    const pointFeatures: GeoJSON.Feature[] = shipments.flatMap((shipment) => {
       const isActive = activeShipment?.id === shipment.id;
       
       return [
         {
-          type: 'Feature',
+          type: 'Feature' as const,
           geometry: {
-            type: 'Point',
+            type: 'Point' as const,
             coordinates: shipment.origin.coordinates
           },
           properties: {
@@ -429,9 +429,9 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
           }
         },
         {
-          type: 'Feature',
+          type: 'Feature' as const,
           geometry: {
-            type: 'Point',
+            type: 'Point' as const,
             coordinates: shipment.destination.coordinates
           },
           properties: {
@@ -458,7 +458,7 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       const start = activeShipment.origin.coordinates;
       const end = activeShipment.destination.coordinates;
       
-      const midpoint = [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
+      const midpoint: [number, number] = [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
       
       // Calculate appropriate zoom level based on distance
       const distance = turf.distance(

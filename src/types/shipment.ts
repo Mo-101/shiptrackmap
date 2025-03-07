@@ -1,7 +1,8 @@
+
 export interface Shipment {
   id: string;
   name: string;
-  type: 'ship' | 'charter';
+  type: 'ship' | 'charter' | 'truck';
   origin: {
     name: string;
     coordinates: [number, number];
