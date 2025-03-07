@@ -1,14 +1,15 @@
 
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import ShipmentMap from '../components/ShipmentMap';
 import ShipmentList from '../components/ShipmentList';
-import ShipmentDetail from './ShipmentDetail';
+import NavHeader from '../components/NavHeader';
 import { Shipment } from '../types/shipment';
-import AFRICAN_SHIPMENTS from '../data/africanShipments';
+import { AFRICAN_SHIPMENTS } from '../data/africanShipments';
 
 const Index = () => {
   const [activeShipment, setActiveShipment] = useState<Shipment | undefined>();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const location = useLocation();
   
   // Set active shipment based on URL when on detail page
@@ -22,31 +23,43 @@ const Index = () => {
     }
   }, [location.pathname]);
 
+  // If URL has a track parameter, set the active shipment
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const trackId = params.get('track');
+    if (trackId) {
+      const shipment = AFRICAN_SHIPMENTS.find(s => s.id === trackId);
+      if (shipment) {
+        setActiveShipment(shipment);
+      }
+    }
+  }, [location.search]);
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
+
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <div className="h-screen w-screen flex bg-palette-darkblue">
-            <ShipmentList
-              shipments={AFRICAN_SHIPMENTS}
-              activeShipment={activeShipment}
-              onShipmentSelect={setActiveShipment}
-            />
-            <div className="flex-1 relative">
-              <ShipmentMap
-                shipments={AFRICAN_SHIPMENTS}
-                activeShipment={activeShipment}
-              />
-            </div>
-          </div>
-        }
-      />
-      <Route
-        path="/shipment/:id"
-        element={<ShipmentDetail shipment={AFRICAN_SHIPMENTS.find(s => s.id === location.pathname.split('/').pop())} />}
-      />
-    </Routes>
+    <div className="h-screen w-screen overflow-hidden flex flex-col bg-palette-darkblue">
+      <NavHeader toggleSidebar={toggleSidebar} />
+      
+      <div className="flex flex-1 overflow-hidden">
+        <ShipmentList
+          shipments={AFRICAN_SHIPMENTS}
+          activeShipment={activeShipment}
+          onShipmentSelect={setActiveShipment}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={toggleSidebar}
+        />
+        
+        <div className="flex-1 relative">
+          <ShipmentMap
+            shipments={AFRICAN_SHIPMENTS}
+            activeShipment={activeShipment}
+          />
+        </div>
+      </div>
+    </div>
   );
 };
 
