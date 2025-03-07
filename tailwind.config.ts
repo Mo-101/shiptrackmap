@@ -1,15 +1,15 @@
 
-import type { Config } from "tailwindcss";
+import { type Config } from "tailwindcss";
+import { fontFamily } from "tailwindcss/defaultTheme";
 
 export default {
   darkMode: ["class"],
   content: [
-    "./pages/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
-  ],
-  prefix: "",
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
+	],
   theme: {
     container: {
       center: true,
@@ -26,82 +26,87 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#0C3A62",
-          foreground: "#ffffff",
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
-          DEFAULT: "#15ABC0",
-          foreground: "#ffffff",
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
         },
-        ocean: {
-          light: "#76A6B4",
-          DEFAULT: "#0C3A62",
-          dark: "#071777",
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
         },
-        shipping: {
-          light: "#E8F5E9",
-          DEFAULT: "#2E7D32",
-          dark: "#1B5E20",
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
         },
-        // Updated color palette with darker blues
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
         palette: {
-          darkblue: "#071777", // Darkest blue (background)
-          blue: "#0C3A62",     // Dark blue (primary)
-          teal: "#15ABC0",     // Teal blue
-          mint: "#62F3F7",     // Light mint/cyan
-          sage: "#76A6B4",     // Sage blue/gray
-          sand: "#DCCC82",     // Sand/beige
-        }
+          darkblue: "#071077",
+          blue: "#0C3A62",
+          teal: "#15ABC0",
+          mint: "#62F3F7",
+          sage: "#91A0A9",
+          sand: "#DCCC82"
+        },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        sans: ["var(--font-sans)", ...fontFamily.sans],
+        mono: ["Space Mono", "monospace"],
       },
       keyframes: {
-        "fade-in": {
-          "0%": { opacity: "0" },
-          "100%": { opacity: "1" },
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
-        "slide-in": {
-          "0%": { transform: "translateX(-100%)" },
-          "100%": { transform: "translateX(0)" },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
-        "pulse-opacity": {
-          "0%, 100%": { opacity: "0.6" },
-          "50%": { opacity: "0.2" },
-        },
-        // Adding new animations for sci-fi effects
-        "scanner-line": {
-          "0%": { transform: "translateY(0%)" },
-          "100%": { transform: "translateY(100%)" },
-        },
-        "grid-flow": {
-          "0%": { backgroundPosition: "0% 0%" },
-          "100%": { backgroundPosition: "100% 100%" },
+        "scanner": {
+          "0%": { top: "0%" },
+          "100%": { top: "100%" }
         },
         "blink": {
           "0%, 100%": { opacity: "1" },
-          "50%": { opacity: "0.3" },
+          "50%": { opacity: "0.3" }
         },
-        "float": {
-          "0%, 100%": { transform: "translateY(0px)" },
-          "50%": { transform: "translateY(-10px)" },
+        "pulse-opacity": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.6" }
         },
+        "gradient-shift": {
+          "0%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+          "100%": { backgroundPosition: "0% 50%" }
+        }
       },
       animation: {
-        "fade-in": "fade-in 0.5s ease-out",
-        "slide-in": "slide-in 0.5s ease-out",
-        "pulse-opacity": "pulse-opacity 2s ease-in-out infinite",
-        // Adding new animations
-        "scanner": "scanner-line 2s ease-in-out infinite",
-        "grid-flow": "grid-flow 20s linear infinite",
-        "blink": "blink 1.5s ease-in-out infinite",
-        "float": "float 3s ease-in-out infinite",
-      },
-      backgroundImage: {
-        "grid-pattern": "linear-gradient(rgba(98, 243, 247, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(98, 243, 247, 0.1) 1px, transparent 1px)",
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-      },
-      backgroundSize: {
-        "grid-50": "50px 50px",
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+        "scanner": "scanner 10s linear infinite",
+        "blink": "blink 1.5s infinite",
+        "pulse-opacity": "pulse-opacity 2s infinite",
+        "gradient-shift": "gradient-shift 6s ease infinite"
       },
     },
   },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config;
+} satisfies Config
