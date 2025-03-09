@@ -105,6 +105,7 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
         // Calculate animation duration based on distance (longer routes = slower animation)
         const duration = Math.max(8000, routeCoordinates.length * 1000); // min 8 seconds
         const animationId = animateShipmentRoute(map, routeCoordinates, duration);
+        // Fixed: Use the returned animation frame ID directly (number type)
         setAnimationFrame(animationId);
         
         // Show toast notification

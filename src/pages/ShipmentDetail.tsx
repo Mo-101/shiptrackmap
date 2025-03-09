@@ -4,6 +4,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Package, Warehouse, FileText, Calendar, Weight, Database, DollarSign, Box, Truck, ArrowLeft, MapPin, Clock, Ship, Plane, Check } from 'lucide-react';
 import { Card } from "@/components/ui/card";
 import { Shipment } from '../types/shipment';
+import { toast } from '@/components/ui/use-toast';
 
 interface ShipmentDetailProps {
   shipment?: Shipment;
@@ -26,6 +27,19 @@ const ShipmentDetail: React.FC<ShipmentDetailProps> = ({ shipment }) => {
       </div>
     </div>
   );
+
+  // Function to handle in-app tracking
+  const handleTrackRoute = () => {
+    // Navigate to the main page with tracking parameter
+    navigate(`/?track=${shipment.id}`);
+    
+    // Show a toast notification
+    toast({
+      title: "Tracking Route",
+      description: `Navigating to live tracking for shipment ${shipment.id}`,
+      duration: 3000,
+    });
+  };
 
   // Categorize shipment details for the cards
   const basicDetails = [
@@ -109,7 +123,7 @@ const ShipmentDetail: React.FC<ShipmentDetailProps> = ({ shipment }) => {
             ))}
             
             <button 
-              onClick={() => window.open(`https://www.google.com/maps/dir/${shipment.origin.coordinates[1]},${shipment.origin.coordinates[0]}/${shipment.destination.coordinates[1]},${shipment.destination.coordinates[0]}`, '_blank')}
+              onClick={handleTrackRoute}
               className="mt-4 w-full py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors font-medium"
             >
               Track Route

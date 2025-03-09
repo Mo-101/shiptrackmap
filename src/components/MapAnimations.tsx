@@ -1,4 +1,3 @@
-
 import mapboxgl from 'mapbox-gl';
 import * as turf from '@turf/turf';
 
@@ -151,11 +150,11 @@ export const createMovingDotAnimation = (map: mapboxgl.Map) => {
   }
 };
 
-export const animateShipmentRoute = (map: mapboxgl.Map, route: [number, number][], duration: number = 10000) => {
+export const animateShipmentRoute = (map: mapboxgl.Map, route: [number, number][], duration: number = 10000): number => {
   try {
     if (!map.getSource('animated-line-source') || !map.getSource('moving-dot-source')) {
       console.error('Animation sources not initialized');
-      return;
+      return 0; // Return a number instead of void
     }
 
     // Set the line data
@@ -188,14 +187,17 @@ export const animateShipmentRoute = (map: mapboxgl.Map, route: [number, number][
       
       // Continue the animation if not complete
       if (progress < 1) {
-        requestAnimationFrame(animate);
+        return requestAnimationFrame(animate);
       }
+      
+      return 0;
     }
     
-    // Start the animation
-    requestAnimationFrame(animate);
+    // Start the animation and return the animation frame ID
+    return requestAnimationFrame(animate);
   } catch (error) {
     console.error('Error animating route:', error);
+    return 0; // Return a number instead of void in case of error
   }
 };
 
