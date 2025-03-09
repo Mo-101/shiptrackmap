@@ -31,6 +31,8 @@ const Index = () => {
       const shipment = AFRICAN_SHIPMENTS.find(s => s.id === trackId);
       if (shipment) {
         setActiveShipment(shipment);
+        // Log for debugging
+        console.log("Set active shipment from URL param:", shipment.id);
       }
     }
   }, [location.search]);
@@ -40,7 +42,7 @@ const Index = () => {
   };
 
   return (
-    <div className="h-screen w-screen overflow-hidden flex flex-col bg-palette-darkblue">
+    <div className="h-screen w-screen overflow-hidden flex flex-col bg-primary">
       <NavHeader toggleSidebar={toggleSidebar} />
       
       <div className="flex flex-1 overflow-hidden">

@@ -12,17 +12,18 @@ const MapContainer: React.FC<MapContainerProps> = ({ onMapLoad }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapInitialized, setMapInitialized] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!mapContainer.current || mapInitialized) return;
 
-    console.log("Initializing Mapbox with token:", MAPBOX_ACCESS_TOKEN);
+    console.log("Initializing Mapbox with token:", MAPBOX_ACCESS_TOKEN ? "Token exists" : "No token found");
     
-    // Set the access token before initializing the map
+    // Set the access token before initializing the map with a fallback token if needed
     mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN || 'pk.eyJ1IjoiYWthbmltbzEiLCJhIjoiY2w5ODU2cjR2MDR3dTNxcXRpdG5jb3Z6dyJ9.vi2wspa-B9a9gYYWMpEm0A';
 
     try {
-      // Fix TypeScript error by explicitly typing center as [number, number]
+      // Create the map instance
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: MAPBOX_STYLE || 'mapbox://styles/mapbox/dark-v11', // Fallback to dark style for futuristic look
@@ -31,26 +32,42 @@ const MapContainer: React.FC<MapContainerProps> = ({ onMapLoad }) => {
         pitch: MAP_INITIAL_CONFIG.pitch,
         projection: MAP_INITIAL_CONFIG.projection,
         renderWorldCopies: true,
-        antialias: true
+        antialias: true,
+        preserveDrawingBuffer: true // Add this for better rendering
       });
 
-      console.log("Map instance created");
+      console.log("Map instance created with style:", MAPBOX_STYLE || 'mapbox://styles/mapbox/dark-v11');
 
-      // Make sure we wait for style to load before triggering the onMapLoad callback
-      map.current.on('load', () => {
-        if (!map.current) return;
+      // Make sure we only call onMapLoad after style and data is fully loaded
+      map.current.on('style.load', () => {
         console.log("Map style loaded successfully");
-        setMapInitialized(true);
-        setupMapEffects(map.current);
-        onMapLoad(map.current);
+        
+        if (!map.current) return;
+        
+        // Add additional event to ensure all map layers are loaded
+        if (map.current.isStyleLoaded()) {
+          console.log("Map is fully loaded");
+          setMapInitialized(true);
+          setupMapEffects(map.current);
+          onMapLoad(map.current);
+        } else {
+          map.current.once('idle', () => {
+            console.log("Map is now idle and ready");
+            setMapInitialized(true);
+            setupMapEffects(map.current);
+            onMapLoad(map.current);
+          });
+        }
       });
       
       // Add error handling
       map.current.on('error', (e) => {
-        console.error("Mapbox error:", e.error);
+        console.error("Mapbox error:", e);
+        setMapError("Failed to load map: " + e.error?.message || "Unknown error");
       });
     } catch (error) {
       console.error("Error initializing map:", error);
+      setMapError("Failed to initialize map");
     }
 
     return () => {
@@ -66,11 +83,17 @@ const MapContainer: React.FC<MapContainerProps> = ({ onMapLoad }) => {
       {/* Enhanced loading state with ultra-futuristic design */}
       {!mapInitialized && (
         <div className="absolute inset-0 bg-primary/90 flex flex-col items-center justify-center z-50">
-          <div className="text-accent text-3xl font-bold mb-4 tracking-wider animate-pulse">AfriWave CargoLive™</div>
-          <div className="w-64 h-1 bg-secondary/30 rounded-full mb-6 overflow-hidden">
-            <div className="h-full bg-accent animate-gradient-shift" style={{width: '60%', backgroundImage: 'linear-gradient(90deg, rgba(79,243,248,0.8) 0%, rgba(79,243,248,0.2) 50%, rgba(79,243,248,0.8) 100%)', backgroundSize: '200% 100%'}}></div>
+          <div className="text-accent text-3xl font-bold mb-4 tracking-wider animate-pulse neon-text">AfriWave CargoLive™</div>
+          <div className="w-64 h-1 bg-secondary/30 rounded-full mb-6 overflow-hidden tech-border">
+            <div className="h-full bg-accent animate-gradient-shift data-flow" style={{width: '60%', backgroundImage: 'linear-gradient(90deg, rgba(79,243,248,0.8) 0%, rgba(79,243,248,0.2) 50%, rgba(79,243,248,0.8) 100%)', backgroundSize: '200% 100%'}}></div>
           </div>
-          <div className="text-white text-lg animate-pulse-opacity">Initializing logistics network...</div>
+          <div className="text-white text-lg animate-pulse-opacity terminal-typing">Initializing logistics network...</div>
+          
+          {mapError && (
+            <div className="mt-4 text-red-500 bg-primary/80 p-2 rounded border border-red-400">
+              {mapError}
+            </div>
+          )}
           
           {/* Futuristic hexagon pattern */}
           <div className="absolute inset-0 pointer-events-none opacity-20 z-0">
@@ -112,35 +135,44 @@ const MapContainer: React.FC<MapContainerProps> = ({ onMapLoad }) => {
 };
 
 const setupMapEffects = (map: mapboxgl.Map) => {
-  // Add futuristic map effects
-  map.setFog({
-    color: 'rgb(7, 23, 59)', // Darker blue for a futuristic look
-    'high-color': 'rgb(12, 38, 78)',
-    'horizon-blend': 0.4,
-    'space-color': 'rgb(3, 9, 33)',
-    'star-intensity': 0.8
-  });
+  try {
+    // Add futuristic map effects
+    map.setFog({
+      color: 'rgb(7, 23, 59)', // Darker blue for a futuristic look
+      'high-color': 'rgb(12, 38, 78)',
+      'horizon-blend': 0.4,
+      'space-color': 'rgb(3, 9, 33)',
+      'star-intensity': 0.8
+    });
 
-  map.addLayer({
-    id: 'sky',
-    type: 'sky',
-    paint: {
-      'sky-type': 'atmosphere',
-      'sky-atmosphere-sun': [0.0, 90.0],
-      'sky-atmosphere-sun-intensity': 18,
-      'sky-atmosphere-color': 'rgba(12, 38, 78, 1)'
+    // Only add sky layer if it doesn't exist
+    if (!map.getLayer('sky')) {
+      map.addLayer({
+        id: 'sky',
+        type: 'sky',
+        paint: {
+          'sky-type': 'atmosphere',
+          'sky-atmosphere-sun': [0.0, 90.0],
+          'sky-atmosphere-sun-intensity': 18,
+          'sky-atmosphere-color': 'rgba(12, 38, 78, 1)'
+        }
+      });
     }
-  });
 
-  // Add a subtle globe rotation for enhanced visual effect
-  const rotateCamera = (timestamp: number) => {
-    // Rotate very slowly
-    map.rotateTo((timestamp / 1000) * 0.5 % 360, { duration: 0 });
+    // Add a subtle globe rotation for enhanced visual effect
+    const rotateCamera = (timestamp: number) => {
+      // Rotate very slowly
+      if (map) {
+        map.rotateTo((timestamp / 1000) * 0.5 % 360, { duration: 0 });
+        requestAnimationFrame(rotateCamera);
+      }
+    };
+
+    // Enable rotation for better futuristic feeling
     requestAnimationFrame(rotateCamera);
-  };
-
-  // Enable rotation for better futuristic feeling
-  requestAnimationFrame(rotateCamera);
+  } catch (error) {
+    console.error("Error setting up map effects:", error);
+  }
 };
 
 export default MapContainer;

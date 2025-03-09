@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Shipment } from '../types/shipment';
 import WeatherInfo from './WeatherInfo';
 import ShipmentTooltip from './ShipmentTooltip';
@@ -24,67 +24,102 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
   const [isTracking, setIsTracking] = useState(false);
   const [animationFrame, setAnimationFrame] = useState<number | null>(null);
   const [activeAnimation, setActiveAnimation] = useState<string | null>(null);
+  const [mapInitError, setMapInitError] = useState<string | null>(null);
+  
+  // Use a ref to track if animation was attempted before map was ready
+  const pendingAnimationRef = useRef<Shipment | null>(null);
 
   const handleMapLoad = (loadedMap: mapboxgl.Map) => {
     console.log("Map loaded successfully");
-    initializeShipmentLayers(loadedMap);
-    createLineAnimation(loadedMap);
-    createMovingDotAnimation(loadedMap);
-    setMap(loadedMap);
-    setMapLoaded(true);
     
-    // Welcome toast for AfriWave CargoLive™
-    toast({
-      title: 'AfriWave CargoLive™',
-      description: 'Welcome to the cutting-edge shipment tracker dashboard',
-      duration: 5000,
-    });
+    try {
+      initializeShipmentLayers(loadedMap);
+      createLineAnimation(loadedMap);
+      createMovingDotAnimation(loadedMap);
+      setMap(loadedMap);
+      setMapLoaded(true);
+      
+      // Check if we have a pending animation
+      if (pendingAnimationRef.current) {
+        console.log("Processing pending animation for:", pendingAnimationRef.current.id);
+        setTimeout(() => {
+          jumpToShipment(pendingAnimationRef.current!, true);
+          pendingAnimationRef.current = null;
+        }, 1000);
+      }
+      
+      // Welcome toast for AfriWave CargoLive™
+      toast({
+        title: 'AfriWave CargoLive™',
+        description: 'Welcome to the cutting-edge shipment tracker dashboard',
+        duration: 5000,
+      });
+    } catch (error) {
+      console.error("Error during map initialization:", error);
+      setMapInitError("Failed to initialize map components");
+    }
   };
 
   // Jump to shipment animation
   const jumpToShipment = useCallback((shipment: Shipment, animate: boolean = true) => {
-    if (!map) return;
-    
-    const origin = shipment.origin.coordinates;
-    const destination = shipment.destination.coordinates;
-    
-    // Calculate bounds that include both origin and destination
-    const bounds = new mapboxgl.LngLatBounds()
-      .extend(origin)
-      .extend(destination);
-    
-    // Fly to the bounding box with animation
-    map.fitBounds(bounds, {
-      padding: 100,
-      duration: 2000,
-      pitch: 60, // Dramatic pitch for better visualization
-      essential: true
-    });
-    
-    // Get route coordinates from arc route
-    const routeFeature = createArcRoute(shipment, true);
-    // Access coordinates with type assertion to avoid TypeScript error
-    const routeCoordinates = (routeFeature.geometry as GeoJSON.LineString).coordinates as [number, number][];
-    
-    // Cancel any existing animation
-    if (animationFrame) {
-      cancelAnimationFrame(animationFrame);
+    if (!map || !map.loaded()) {
+      console.log("Map not ready, setting pending animation for:", shipment.id);
+      pendingAnimationRef.current = shipment;
+      return;
     }
     
-    // Update the tracking line
-    updateLineAnimation(map, routeCoordinates);
-    
-    // Start the animation of the cargo moving along the route
-    if (animate) {
-      setActiveAnimation(shipment.id);
-      // Calculate animation duration based on distance (longer routes = slower animation)
-      const duration = Math.max(8000, routeCoordinates.length * 1000); // min 8 seconds
-      animateShipmentRoute(map, routeCoordinates, duration);
+    try {
+      console.log("Jumping to shipment:", shipment.id);
+      const origin = shipment.origin.coordinates;
+      const destination = shipment.destination.coordinates;
       
-      // Show toast notification
+      // Calculate bounds that include both origin and destination
+      const bounds = new mapboxgl.LngLatBounds()
+        .extend(origin)
+        .extend(destination);
+      
+      // Fly to the bounding box with animation
+      map.fitBounds(bounds, {
+        padding: 100,
+        duration: 2000,
+        pitch: 60, // Dramatic pitch for better visualization
+        essential: true
+      });
+      
+      // Get route coordinates from arc route
+      const routeFeature = createArcRoute(shipment, true);
+      // Access coordinates with type assertion
+      const routeCoordinates = (routeFeature.geometry as GeoJSON.LineString).coordinates as [number, number][];
+      
+      // Cancel any existing animation
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+      }
+      
+      // Update the tracking line
+      updateLineAnimation(map, routeCoordinates);
+      
+      // Start the animation of the cargo moving along the route
+      if (animate) {
+        setActiveAnimation(shipment.id);
+        // Calculate animation duration based on distance (longer routes = slower animation)
+        const duration = Math.max(8000, routeCoordinates.length * 1000); // min 8 seconds
+        const animationId = animateShipmentRoute(map, routeCoordinates, duration);
+        setAnimationFrame(animationId);
+        
+        // Show toast notification
+        toast({
+          title: `CargoLive™ Tracking: ${shipment.id}`,
+          description: `From ${shipment.origin.name} to ${shipment.destination.name}`,
+          duration: 3000,
+        });
+      }
+    } catch (error) {
+      console.error("Error in jumpToShipment:", error);
       toast({
-        title: `CargoLive™ Tracking: ${shipment.id}`,
-        description: `From ${shipment.origin.name} to ${shipment.destination.name}`,
+        title: 'Animation Error',
+        description: 'Failed to animate shipment route',
+        variant: 'destructive',
         duration: 3000,
       });
     }
@@ -94,11 +129,15 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
   useEffect(() => {
     if (!map || !map.loaded()) return;
     
-    updateShipmentData(map, shipments, activeShipment);
-    
-    // If there's an active shipment, we can enable tracking
-    if (activeShipment && isTracking) {
-      jumpToShipment(activeShipment, true);
+    try {
+      updateShipmentData(map, shipments, activeShipment);
+      
+      // If there's an active shipment, we can enable tracking
+      if (activeShipment && isTracking) {
+        jumpToShipment(activeShipment, true);
+      }
+    } catch (error) {
+      console.error("Error updating shipment data:", error);
     }
   }, [shipments, activeShipment, mapLoaded, map, isTracking, jumpToShipment]);
 
@@ -157,19 +196,21 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
     <div className="relative w-full h-full">
       <MapContainer onMapLoad={handleMapLoad} />
       
-      <MapEvents
-        map={map}
-        shipments={shipments}
-        onLocationSelect={setSelectedLocation}
-        onShipmentHover={setHoveredShipment}
-      />
+      {mapLoaded && map && (
+        <MapEvents
+          map={map}
+          shipments={shipments}
+          onLocationSelect={setSelectedLocation}
+          onShipmentHover={setHoveredShipment}
+        />
+      )}
       
       <MapHUD shipments={shipments} />
       
       {/* AfriWave CargoLive™ branding */}
       <div className="absolute top-4 left-4 z-10 flex items-center">
-        <div className="bg-primary/80 backdrop-blur-md px-3 py-2 rounded-md border border-accent/30 text-white flex items-center">
-          <span className="text-accent font-bold">AfriWave</span>
+        <div className="bg-primary/80 backdrop-blur-md px-3 py-2 rounded-md border border-accent/30 text-white flex items-center tech-border">
+          <span className="text-accent font-bold neon-text">AfriWave</span>
           <span className="ml-1 text-white font-medium">CargoLive™</span>
           <div className="ml-2 w-2 h-2 bg-accent rounded-full animate-pulse"></div>
         </div>
@@ -180,9 +221,9 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
         {activeShipment && (
           <button
             onClick={toggleTracking}
-            className={`px-4 py-2 rounded-md font-medium transition-colors ${
+            className={`px-4 py-2 rounded-md font-medium transition-colors tech-border ${
               isTracking 
-                ? 'bg-accent text-primary shadow-md' 
+                ? 'bg-accent text-primary shadow-md futuristic-glow' 
                 : 'bg-primary/80 text-white hover:bg-primary'
             }`}
           >
@@ -192,7 +233,7 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
         
         <button
           onClick={startItineraryAnimation}
-          className="px-4 py-2 rounded-md font-medium bg-secondary/80 text-white hover:bg-secondary transition-colors"
+          className="px-4 py-2 rounded-md font-medium bg-secondary/80 text-white hover:bg-secondary transition-colors tech-border"
         >
           Animate All Routes
         </button>
@@ -200,9 +241,9 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       
       {/* Active shipment indicator - bottom left */}
       {activeShipment && (
-        <div className="absolute bottom-4 left-4 z-10 bg-primary/90 backdrop-blur-sm p-3 rounded-md border border-accent/30 text-white max-w-xs">
+        <div className="absolute bottom-4 left-4 z-10 bg-primary/90 backdrop-blur-sm p-3 rounded-md border border-accent/30 text-white max-w-xs hologram-effect">
           <div className="flex items-center">
-            <h3 className="text-accent font-semibold">Supply Chain Pulse™</h3>
+            <h3 className="text-accent font-semibold neon-text">Supply Chain Pulse™</h3>
             <button 
               onClick={() => viewShipmentAnimation(activeShipment)}
               className="ml-2 text-xs px-2 py-0.5 bg-accent/20 rounded hover:bg-accent/30 transition-colors"
@@ -243,6 +284,20 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
           location={selectedLocation}
           onClose={() => setSelectedLocation(null)}
         />
+      )}
+      
+      {/* Display initialization error if any */}
+      {mapInitError && (
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-red-900/80 text-white p-4 rounded-md border border-red-500 max-w-md">
+          <h3 className="text-xl font-bold mb-2">Map Error</h3>
+          <p>{mapInitError}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-3 px-4 py-2 bg-red-700 hover:bg-red-600 rounded-md"
+          >
+            Reload Application
+          </button>
+        </div>
       )}
     </div>
   );
