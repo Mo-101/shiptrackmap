@@ -47,10 +47,23 @@ const MapContainer: React.FC<MapContainerProps> = ({ onMapLoad }) => {
     <div className="relative w-full h-full">
       <div ref={mapContainer} className="w-full h-full" />
       {!mapInitialized && (
-        <div className="absolute inset-0 bg-primary/90 flex items-center justify-center">
-          <div className="text-white text-lg animate-pulse">Loading map...</div>
+        <div className="absolute inset-0 bg-primary/90 flex flex-col items-center justify-center">
+          <div className="text-accent text-2xl font-bold mb-2">AfriWave CargoLive™</div>
+          <div className="text-white text-lg animate-pulse">Initializing logistics network...</div>
         </div>
       )}
+      
+      {/* Enhanced map styling - decorative elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Top-left corner decorative element */}
+        <div className="absolute top-12 left-12 w-24 h-24 border-t-2 border-l-2 border-accent/50 rounded-tl-lg"></div>
+        
+        {/* Bottom-right corner decorative element */}
+        <div className="absolute bottom-12 right-12 w-24 h-24 border-b-2 border-r-2 border-accent/50 rounded-br-lg"></div>
+        
+        {/* Scanner line effect */}
+        <div className="scanner-line" style={{top: '30%'}}></div>
+      </div>
     </div>
   );
 };

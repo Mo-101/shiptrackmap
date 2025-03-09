@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { Shipment } from '../../types/shipment';
+import { toast } from '@/components/ui/use-toast';
 
 interface MapEventsProps {
   map: mapboxgl.Map | null;
@@ -20,7 +21,31 @@ const MapEvents: React.FC<MapEventsProps> = ({
     if (!map) return;
 
     const handleClick = (e: mapboxgl.MapMouseEvent) => {
-      onLocationSelect([e.lngLat.lng, e.lngLat.lat]);
+      // Check if we clicked on a route or point
+      const features = map.queryRenderedFeatures(e.point, {
+        layers: [
+          'routes-ship', 'routes-charter', 'routes-truck',
+          'points'
+        ]
+      });
+      
+      if (features.length > 0) {
+        // If we clicked on a shipment feature, find the related shipment
+        const shipmentId = features[0].properties?.shipmentId;
+        if (shipmentId) {
+          const clickedShipment = shipments.find(s => s.id === shipmentId);
+          if (clickedShipment) {
+            toast({
+              title: `Shipment Selected: ${clickedShipment.id}`,
+              description: `Type: ${clickedShipment.type} • Status: ${clickedShipment.status}`,
+              duration: 3000,
+            });
+          }
+        }
+      } else {
+        // If we clicked on the map itself (not a feature), select the location for weather
+        onLocationSelect([e.lngLat.lng, e.lngLat.lat]);
+      }
     };
 
     const handleMouseMove = (e: mapboxgl.MapMouseEvent) => {
@@ -47,10 +72,14 @@ const MapEvents: React.FC<MapEventsProps> = ({
 
     map.on('click', handleClick);
 
+    // Set up interactivity for all route and point layers
     ['ship', 'charter', 'truck'].forEach(type => {
       map.on('mousemove', `routes-${type}`, handleMouseMove);
       map.on('mouseleave', `routes-${type}`, handleMouseLeave);
     });
+    
+    map.on('mousemove', 'points', handleMouseMove);
+    map.on('mouseleave', 'points', handleMouseLeave);
 
     return () => {
       map.off('click', handleClick);
@@ -58,6 +87,8 @@ const MapEvents: React.FC<MapEventsProps> = ({
         map.off('mousemove', `routes-${type}`, handleMouseMove);
         map.off('mouseleave', `routes-${type}`, handleMouseLeave);
       });
+      map.off('mousemove', 'points', handleMouseMove);
+      map.off('mouseleave', 'points', handleMouseLeave);
     };
   }, [map, shipments, onLocationSelect, onShipmentHover]);
 

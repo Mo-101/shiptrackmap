@@ -4,10 +4,10 @@ import { Shipment } from '../types/shipment';
 import WeatherInfo from './WeatherInfo';
 import ShipmentTooltip from './ShipmentTooltip';
 import MapHUD from './MapHUD';
-import { createLineAnimation, updateLineAnimation } from './MapAnimations';
+import { createLineAnimation, updateLineAnimation, createMovingDotAnimation, animateShipmentRoute } from './MapAnimations';
 import MapContainer from './map/MapContainer';
 import MapEvents from './map/MapEvents';
-import { initializeShipmentLayers, updateShipmentData } from '../utils/mapUtils';
+import { initializeShipmentLayers, updateShipmentData, createArcRoute } from '../utils/mapUtils';
 import mapboxgl from 'mapbox-gl';
 import { toast } from '@/components/ui/use-toast';
 
@@ -23,15 +23,25 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
   const [mapLoaded, setMapLoaded] = useState(false);
   const [isTracking, setIsTracking] = useState(false);
   const [animationFrame, setAnimationFrame] = useState<number | null>(null);
+  const [activeAnimation, setActiveAnimation] = useState<string | null>(null);
 
   const handleMapLoad = (loadedMap: mapboxgl.Map) => {
     initializeShipmentLayers(loadedMap);
+    createLineAnimation(loadedMap);
+    createMovingDotAnimation(loadedMap);
     setMap(loadedMap);
     setMapLoaded(true);
+    
+    // Welcome toast for AfriWave CargoLive™
+    toast({
+      title: 'AfriWave CargoLive™',
+      description: 'Welcome to the cutting-edge shipment tracker dashboard',
+      duration: 5000,
+    });
   };
 
   // Jump to shipment animation
-  const jumpToShipment = useCallback((shipment: Shipment) => {
+  const jumpToShipment = useCallback((shipment: Shipment, animate: boolean = true) => {
     if (!map) return;
     
     const origin = shipment.origin.coordinates;
@@ -50,13 +60,33 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       essential: true
     });
     
-    // Show toast notification
-    toast({
-      title: `Viewing Shipment: ${shipment.id}`,
-      description: `From ${shipment.origin.name} to ${shipment.destination.name}`,
-      duration: 3000,
-    });
-  }, [map]);
+    // Get route coordinates from arc route
+    const routeFeature = createArcRoute(shipment, true);
+    const routeCoordinates = routeFeature.geometry.coordinates as [number, number][];
+    
+    // Cancel any existing animation
+    if (animationFrame) {
+      cancelAnimationFrame(animationFrame);
+    }
+    
+    // Update the tracking line
+    updateLineAnimation(map, routeCoordinates);
+    
+    // Start the animation of the cargo moving along the route
+    if (animate) {
+      setActiveAnimation(shipment.id);
+      // Calculate animation duration based on distance (longer routes = slower animation)
+      const duration = Math.max(8000, routeCoordinates.length * 1000); // min 8 seconds
+      animateShipmentRoute(map, routeCoordinates, duration);
+      
+      // Show toast notification
+      toast({
+        title: `CargoLive™ Tracking: ${shipment.id}`,
+        description: `From ${shipment.origin.name} to ${shipment.destination.name}`,
+        duration: 3000,
+      });
+    }
+  }, [map, animationFrame]);
 
   // Update map data when shipments or active shipment changes
   useEffect(() => {
@@ -65,44 +95,17 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
     updateShipmentData(map, shipments, activeShipment);
     
     // If there's an active shipment, we can enable tracking
-    if (activeShipment) {
-      // Create or update the tracking animation line with the active shipment's route
-      const originCoords = activeShipment.origin.coordinates;
-      const destCoords = activeShipment.destination.coordinates;
-      
-      // Create a route path between origin and destination
-      // This would typically come from a real-time API in production
-      const routeCoordinates = [originCoords, destCoords];
-      
-      // Update the animated line
-      updateLineAnimation(map, routeCoordinates);
-      
-      // If tracking is enabled, center the map on the current shipment
-      if (isTracking) {
-        jumpToShipment(activeShipment);
-      }
+    if (activeShipment && isTracking) {
+      jumpToShipment(activeShipment, true);
     }
   }, [shipments, activeShipment, mapLoaded, map, isTracking, jumpToShipment]);
-
-  // Create animation when map is loaded
-  useEffect(() => {
-    if (map) {
-      createLineAnimation(map);
-    }
-    
-    return () => {
-      if (animationFrame) {
-        cancelAnimationFrame(animationFrame);
-      }
-    };
-  }, [map, animationFrame]);
 
   // Toggle tracking function
   const toggleTracking = () => {
     setIsTracking(prev => {
       const newState = !prev;
       if (newState && activeShipment) {
-        jumpToShipment(activeShipment);
+        jumpToShipment(activeShipment, true);
       }
       return newState;
     });
@@ -110,23 +113,42 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
 
   // Jump to a random shipment every 10 seconds for demo purposes
   const startItineraryAnimation = () => {
+    // Clear any existing animation
+    if (animationFrame) {
+      cancelAnimationFrame(animationFrame);
+    }
+    
+    // Show toast for feature activation
+    toast({
+      title: 'CargoLive™ Itinerary Animation',
+      description: 'Visualizing cargo movements across Africa',
+      duration: 3000,
+    });
+    
     let index = 0;
     
     const animateItineraries = () => {
       if (shipments.length > 0) {
         const shipment = shipments[index % shipments.length];
-        jumpToShipment(shipment);
+        jumpToShipment(shipment, true);
         index++;
       }
       
       const frame = setTimeout(() => {
         requestAnimationFrame(animateItineraries);
-      }, 10000); // Change shipment every 10 seconds
+      }, 12000); // Change shipment every 12 seconds (including animation duration)
       
       setAnimationFrame(frame as unknown as number);
     };
     
     animateItineraries();
+  };
+
+  // View single shipment with animation
+  const viewShipmentAnimation = (shipment: Shipment) => {
+    if (activeAnimation === shipment.id) return;
+    
+    jumpToShipment(shipment, true);
   };
 
   return (
@@ -142,6 +164,15 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       
       <MapHUD shipments={shipments} />
       
+      {/* AfriWave CargoLive™ branding */}
+      <div className="absolute top-4 left-4 z-10 flex items-center">
+        <div className="bg-primary/80 backdrop-blur-md px-3 py-2 rounded-md border border-accent/30 text-white flex items-center">
+          <span className="text-accent font-bold">AfriWave</span>
+          <span className="ml-1 text-white font-medium">CargoLive™</span>
+          <div className="ml-2 w-2 h-2 bg-accent rounded-full animate-pulse"></div>
+        </div>
+      </div>
+      
       {/* Control Panel - top right */}
       <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
         {activeShipment && (
@@ -153,7 +184,7 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
                 : 'bg-primary/80 text-white hover:bg-primary'
             }`}
           >
-            {isTracking ? 'Tracking Active' : 'Start Tracking'}
+            {isTracking ? 'CargoLive™ Active' : 'Start CargoLive™'}
           </button>
         )}
         
@@ -161,19 +192,42 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
           onClick={startItineraryAnimation}
           className="px-4 py-2 rounded-md font-medium bg-secondary/80 text-white hover:bg-secondary transition-colors"
         >
-          Animate Itineraries
+          Animate All Routes
         </button>
       </div>
       
       {/* Active shipment indicator - bottom left */}
       {activeShipment && (
-        <div className="absolute bottom-4 left-4 z-10 bg-primary/80 backdrop-blur-sm p-3 rounded-md border border-accent/30 text-white max-w-xs">
-          <h3 className="text-accent font-semibold">Active Shipment</h3>
+        <div className="absolute bottom-4 left-4 z-10 bg-primary/90 backdrop-blur-sm p-3 rounded-md border border-accent/30 text-white max-w-xs">
+          <div className="flex items-center">
+            <h3 className="text-accent font-semibold">Supply Chain Pulse™</h3>
+            <button 
+              onClick={() => viewShipmentAnimation(activeShipment)}
+              className="ml-2 text-xs px-2 py-0.5 bg-accent/20 rounded hover:bg-accent/30 transition-colors"
+            >
+              Animate
+            </button>
+          </div>
           <p className="text-sm">{activeShipment.id}</p>
           <div className="flex justify-between text-xs mt-1">
             <span>{activeShipment.origin.name}</span>
             <span>→</span>
             <span>{activeShipment.destination.name}</span>
+          </div>
+          <div className="mt-2 text-xs">
+            <div className="flex justify-between">
+              <span>Status:</span>
+              <span className={`font-medium ${
+                activeShipment.status === 'in-transit' ? 'text-accent' :
+                activeShipment.status === 'delivered' ? 'text-green-400' : 'text-yellow-300'
+              }`}>
+                {activeShipment.status.toUpperCase()}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span>ETA:</span>
+              <span>{activeShipment.eta}</span>
+            </div>
           </div>
         </div>
       )}
