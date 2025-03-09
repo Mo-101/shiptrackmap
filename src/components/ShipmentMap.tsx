@@ -26,6 +26,7 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
   const [activeAnimation, setActiveAnimation] = useState<string | null>(null);
 
   const handleMapLoad = (loadedMap: mapboxgl.Map) => {
+    console.log("Map loaded successfully");
     initializeShipmentLayers(loadedMap);
     createLineAnimation(loadedMap);
     createMovingDotAnimation(loadedMap);
@@ -91,7 +92,7 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
 
   // Update map data when shipments or active shipment changes
   useEffect(() => {
-    if (!mapLoaded || !map?.isStyleLoaded()) return;
+    if (!map || !map.loaded()) return;
     
     updateShipmentData(map, shipments, activeShipment);
     

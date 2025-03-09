@@ -17,12 +17,12 @@ const MapContainer: React.FC<MapContainerProps> = ({ onMapLoad }) => {
     if (!mapContainer.current || mapInitialized) return;
 
     // Set the access token before initializing the map
-    mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN || 'pk.eyJ1IjoiZXhhbXBsZXVzZXIiLCJhIjoiY2s4eXF1aDh5MDd1ZzNsbzQ0b3psZXIzNyJ9.xeI8BpZ6g6jV-IUasnS0ZA';
+    mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN || 'pk.eyJ1IjoiYWthbmltbzEiLCJhIjoiY2w5ODU2cjR2MDR3dTNxcXRpdG5jb3Z6dyJ9.vi2wspa-B9a9gYYWMpEm0A';
 
     // Fix TypeScript error by explicitly typing center as [number, number]
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: MAPBOX_STYLE,
+      style: MAPBOX_STYLE || 'mapbox://styles/akanimo1/clcgr62o0003c14mr8b0xg3cn',
       center: MAP_INITIAL_CONFIG.center as [number, number],
       zoom: MAP_INITIAL_CONFIG.zoom,
       pitch: MAP_INITIAL_CONFIG.pitch,
@@ -31,7 +31,8 @@ const MapContainer: React.FC<MapContainerProps> = ({ onMapLoad }) => {
       antialias: true
     });
 
-    map.current.on('style.load', () => {
+    // Make sure we wait for style to load before triggering the onMapLoad callback
+    map.current.on('load', () => {
       if (!map.current) return;
       setMapInitialized(true);
       setupMapEffects(map.current);

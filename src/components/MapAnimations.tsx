@@ -53,16 +53,26 @@ export const createLineAnimation = (map: mapboxgl.Map) => {
       }
     });
 
-    // Animate the line with a fixed pattern to avoid negative values
+    // Animate the line
     const animate = () => {
-      // Use a pattern that ensures both values remain positive
-      const offset = (Date.now() / 100) % 4;
+      const dashOffset = (Date.now() / 100) % 4;
+      const firstValue = 2;
+      const secondValue = Math.max(1, (2 - dashOffset % 2)); // Ensure second value is always positive
       
-      map.setPaintProperty(
-        'animated-line-layer',
-        'line-dasharray',
-        [2, Math.max(1, (2 - offset % 2))] // Ensure second value is always positive
-      );
+      if (map) {
+        try {
+          // Check if layer exists before updating
+          if (map.getLayer('animated-line-layer')) {
+            map.setPaintProperty(
+              'animated-line-layer',
+              'line-dasharray',
+              [firstValue, secondValue]
+            );
+          }
+        } catch (error) {
+          console.error('Error updating animation:', error);
+        }
+      }
       
       requestAnimationFrame(animate);
     };
@@ -172,7 +182,9 @@ export const animateShipmentRoute = (map: mapboxgl.Map, route: [number, number][
       const alongPath = turf.along(line, lineDistance * progress, { units: 'kilometers' });
       
       // Update the dot position
-      dotSource.setData(alongPath);
+      if (dotSource) {
+        dotSource.setData(alongPath);
+      }
       
       // Continue the animation if not complete
       if (progress < 1) {
