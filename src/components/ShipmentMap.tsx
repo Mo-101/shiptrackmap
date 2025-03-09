@@ -62,7 +62,8 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
     
     // Get route coordinates from arc route
     const routeFeature = createArcRoute(shipment, true);
-    const routeCoordinates = routeFeature.geometry.coordinates as [number, number][];
+    // Access coordinates with type assertion to avoid TypeScript error
+    const routeCoordinates = (routeFeature.geometry as GeoJSON.LineString).coordinates as [number, number][];
     
     // Cancel any existing animation
     if (animationFrame) {

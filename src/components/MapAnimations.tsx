@@ -129,9 +129,10 @@ export const createMovingDotAnimation = (map: mapboxgl.Map) => {
       type: 'circle',
       source: 'moving-dot-source',
       paint: {
-        'circle-radius': ['interpolate', ['linear'], ['get', 'pulse', ['at', 0, ['array', ['*', ['%', ['/'], 2], 15]]]], 0, 7, 1, 22],
+        'circle-radius': 15,
         'circle-color': '#DCCC82',
-        'circle-opacity': ['interpolate', ['linear'], ['get', 'pulse', ['at', 0, ['array', ['*', ['%', ['/'], 2], 0.6]]]], 0, 0.6, 1, 0],
+        'circle-opacity': 0.6,
+        'circle-opacity-transition': { duration: 1000 },
         'circle-stroke-width': 0
       }
     });
@@ -156,13 +157,8 @@ export const animateShipmentRoute = (map: mapboxgl.Map, route: [number, number][
     const dotSource = map.getSource('moving-dot-source') as mapboxgl.GeoJSONSource;
     
     // Create a feature for the line to calculate distance along
-    const line = {
-      type: 'Feature',
-      geometry: {
-        type: 'LineString',
-        coordinates: route
-      }
-    } as turf.Feature<turf.LineString>;
+    // Fix: Use turf.lineString and type assertion for proper typing
+    const line = turf.lineString(route);
     
     // Get the total length of the line
     const lineDistance = turf.length(line, { units: 'kilometers' });
