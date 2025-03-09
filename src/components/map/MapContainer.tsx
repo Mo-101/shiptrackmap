@@ -16,30 +16,45 @@ const MapContainer: React.FC<MapContainerProps> = ({ onMapLoad }) => {
   useEffect(() => {
     if (!mapContainer.current || mapInitialized) return;
 
+    console.log("Initializing Mapbox with token:", MAPBOX_ACCESS_TOKEN);
+    
     // Set the access token before initializing the map
     mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN || 'pk.eyJ1IjoiYWthbmltbzEiLCJhIjoiY2w5ODU2cjR2MDR3dTNxcXRpdG5jb3Z6dyJ9.vi2wspa-B9a9gYYWMpEm0A';
 
-    // Fix TypeScript error by explicitly typing center as [number, number]
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: MAPBOX_STYLE || 'mapbox://styles/akanimo1/clcgr62o0003c14mr8b0xg3cn',
-      center: MAP_INITIAL_CONFIG.center as [number, number],
-      zoom: MAP_INITIAL_CONFIG.zoom,
-      pitch: MAP_INITIAL_CONFIG.pitch,
-      projection: MAP_INITIAL_CONFIG.projection,
-      renderWorldCopies: true,
-      antialias: true
-    });
+    try {
+      // Fix TypeScript error by explicitly typing center as [number, number]
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: MAPBOX_STYLE || 'mapbox://styles/mapbox/dark-v11', // Fallback to dark style for futuristic look
+        center: MAP_INITIAL_CONFIG.center as [number, number],
+        zoom: MAP_INITIAL_CONFIG.zoom,
+        pitch: MAP_INITIAL_CONFIG.pitch,
+        projection: MAP_INITIAL_CONFIG.projection,
+        renderWorldCopies: true,
+        antialias: true
+      });
 
-    // Make sure we wait for style to load before triggering the onMapLoad callback
-    map.current.on('load', () => {
-      if (!map.current) return;
-      setMapInitialized(true);
-      setupMapEffects(map.current);
-      onMapLoad(map.current);
-    });
+      console.log("Map instance created");
+
+      // Make sure we wait for style to load before triggering the onMapLoad callback
+      map.current.on('load', () => {
+        if (!map.current) return;
+        console.log("Map style loaded successfully");
+        setMapInitialized(true);
+        setupMapEffects(map.current);
+        onMapLoad(map.current);
+      });
+      
+      // Add error handling
+      map.current.on('error', (e) => {
+        console.error("Mapbox error:", e.error);
+      });
+    } catch (error) {
+      console.error("Error initializing map:", error);
+    }
 
     return () => {
+      console.log("Cleaning up map");
       map.current?.remove();
     };
   }, [onMapLoad, mapInitialized]);
@@ -47,29 +62,57 @@ const MapContainer: React.FC<MapContainerProps> = ({ onMapLoad }) => {
   return (
     <div className="relative w-full h-full">
       <div ref={mapContainer} className="w-full h-full" />
+      
+      {/* Enhanced loading state with ultra-futuristic design */}
       {!mapInitialized && (
-        <div className="absolute inset-0 bg-primary/90 flex flex-col items-center justify-center">
-          <div className="text-accent text-2xl font-bold mb-2">AfriWave CargoLive™</div>
-          <div className="text-white text-lg animate-pulse">Initializing logistics network...</div>
+        <div className="absolute inset-0 bg-primary/90 flex flex-col items-center justify-center z-50">
+          <div className="text-accent text-3xl font-bold mb-4 tracking-wider animate-pulse">AfriWave CargoLive™</div>
+          <div className="w-64 h-1 bg-secondary/30 rounded-full mb-6 overflow-hidden">
+            <div className="h-full bg-accent animate-gradient-shift" style={{width: '60%', backgroundImage: 'linear-gradient(90deg, rgba(79,243,248,0.8) 0%, rgba(79,243,248,0.2) 50%, rgba(79,243,248,0.8) 100%)', backgroundSize: '200% 100%'}}></div>
+          </div>
+          <div className="text-white text-lg animate-pulse-opacity">Initializing logistics network...</div>
+          
+          {/* Futuristic hexagon pattern */}
+          <div className="absolute inset-0 pointer-events-none opacity-20 z-0">
+            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+              <pattern id="hexagons" width="50" height="43.4" patternUnits="userSpaceOnUse" patternTransform="scale(2)">
+                <polygon points="24.8,22 37.3,29 37.3,43 24.8,50 12.4,43 12.4,29" fill="none" stroke="#4FF2F8" strokeWidth="0.5" />
+                <polygon points="0,22 12.4,29 12.4,43 0,50 -12.4,43 -12.4,29" fill="none" stroke="#4FF2F8" strokeWidth="0.5" />
+                <polygon points="24.8,0 37.3,7 37.3,21 24.8,28 12.4,21 12.4,7" fill="none" stroke="#4FF2F8" strokeWidth="0.5" />
+                <polygon points="0,0 12.4,7 12.4,21 0,28 -12.4,21 -12.4,7" fill="none" stroke="#4FF2F8" strokeWidth="0.5" />
+                <polygon points="12.4,10.7 24.8,17.7 24.8,31.7 12.4,38.7 0,31.7 0,17.7" fill="none" stroke="#4FF2F8" strokeWidth="0.5" />
+              </pattern>
+              <rect width="100%" height="100%" fill="url(#hexagons)" />
+            </svg>
+          </div>
         </div>
       )}
       
-      {/* Enhanced map styling - decorative elements */}
+      {/* Enhanced map styling - futuristic decorative elements */}
       <div className="absolute inset-0 pointer-events-none">
+        {/* Data streams effect - vertical lines that move from top to bottom */}
+        <div className="absolute left-1/4 h-full w-[1px] bg-gradient-to-b from-transparent via-accent to-transparent opacity-30 animate-scanner"></div>
+        <div className="absolute left-3/4 h-full w-[1px] bg-gradient-to-b from-transparent via-accent to-transparent opacity-30 animate-scanner" style={{animationDelay: '1s'}}></div>
+        
         {/* Top-left corner decorative element */}
-        <div className="absolute top-12 left-12 w-24 h-24 border-t-2 border-l-2 border-accent/50 rounded-tl-lg"></div>
+        <div className="absolute top-6 left-6 w-32 h-32 border-t-2 border-l-2 border-accent/60 rounded-tl-lg"></div>
         
         {/* Bottom-right corner decorative element */}
-        <div className="absolute bottom-12 right-12 w-24 h-24 border-b-2 border-r-2 border-accent/50 rounded-br-lg"></div>
+        <div className="absolute bottom-6 right-6 w-32 h-32 border-b-2 border-r-2 border-accent/60 rounded-br-lg"></div>
         
-        {/* Scanner line effect */}
-        <div className="scanner-line" style={{top: '30%'}}></div>
+        {/* Scanner lines effect */}
+        <div className="absolute left-0 right-0 h-[2px] bg-accent/40 top-1/4 scanner-line"></div>
+        <div className="absolute left-0 right-0 h-[2px] bg-accent/40 top-3/4 scanner-line" style={{animationDelay: '5s'}}></div>
+        
+        {/* Grid overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(transparent_1px,_transparent_1px),_linear-gradient(to_right,_transparent_1px,_transparent_1px)] bg-[size:40px_40px] [background-position:center] opacity-10"></div>
       </div>
     </div>
   );
 };
 
 const setupMapEffects = (map: mapboxgl.Map) => {
+  // Add futuristic map effects
   map.setFog({
     color: 'rgb(7, 23, 59)', // Darker blue for a futuristic look
     'high-color': 'rgb(12, 38, 78)',
@@ -96,8 +139,8 @@ const setupMapEffects = (map: mapboxgl.Map) => {
     requestAnimationFrame(rotateCamera);
   };
 
-  // Uncomment this to enable rotation (disabled by default as it can be disorienting)
-  // requestAnimationFrame(rotateCamera);
+  // Enable rotation for better futuristic feeling
+  requestAnimationFrame(rotateCamera);
 };
 
 export default MapContainer;
