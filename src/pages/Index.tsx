@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, Link } from 'react-router-dom';
 import ShipmentMap from '../components/ShipmentMap';
 import ShipmentList from '../components/ShipmentList';
 import ShipmentDetail from './ShipmentDetail';
 import { Shipment } from '../types/shipment';
+import { BarChart2 } from 'lucide-react';
 
 const MOCK_SHIPMENTS: Shipment[] = [
   {
@@ -155,17 +156,30 @@ const Index = () => {
       <Route
         path="/"
         element={
-          <div className="h-screen w-screen flex bg-palette-darkblue">
-            <ShipmentList
-              shipments={MOCK_SHIPMENTS}
-              activeShipment={activeShipment}
-              onShipmentSelect={setActiveShipment}
-            />
-            <div className="flex-1 relative">
-              <ShipmentMap
+          <div className="h-screen w-screen flex flex-col bg-palette-darkblue">
+            {/* Analytics Link */}
+            <div className="absolute top-4 right-4 z-10">
+              <Link 
+                to="/analytics" 
+                className="flex items-center gap-2 bg-secondary/80 hover:bg-secondary text-white py-2 px-4 rounded-full text-sm font-medium transition-colors shadow-lg"
+              >
+                <BarChart2 size={16} />
+                <span>Analytics</span>
+              </Link>
+            </div>
+            
+            <div className="flex flex-1 overflow-hidden">
+              <ShipmentList
                 shipments={MOCK_SHIPMENTS}
                 activeShipment={activeShipment}
+                onShipmentSelect={setActiveShipment}
               />
+              <div className="flex-1 relative">
+                <ShipmentMap
+                  shipments={MOCK_SHIPMENTS}
+                  activeShipment={activeShipment}
+                />
+              </div>
             </div>
           </div>
         }
