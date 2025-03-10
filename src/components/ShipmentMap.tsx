@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Shipment } from '../types/shipment';
 import WeatherInfo from './WeatherInfo';
 import ShipmentTooltip from './ShipmentTooltip';
-import MapHUD from './hud';
+import * as HUD from './hud'; // Changed from import MapHUD from './hud' to import * as HUD
 import { 
   createLineAnimation, 
   updateLineAnimation, 
@@ -198,7 +198,7 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       
       {/* Map HUD - positioned above the map but with transparent backgrounds */}
       <div className="absolute inset-0 pointer-events-none z-20">
-        <MapHUD shipments={shipments} />
+        <HUD.default shipments={shipments} />
       </div>
       
       {/* Logo/Title */}
