@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Shipment } from '../types/shipment';
 import WeatherInfo from './WeatherInfo';
@@ -36,18 +35,15 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
     console.log("Map loaded successfully in ShipmentMap");
     
     try {
-      // Set the map
       setMap(loadedMap);
       setMapLoaded(true);
       
-      // Initialize layers with a slight delay to ensure map is ready
       setTimeout(() => {
         try {
           initializeShipmentLayers(loadedMap);
           createLineAnimation(loadedMap);
           createMovingDotAnimation(loadedMap);
           
-          // Process any pending animation
           if (pendingAnimationRef.current) {
             console.log("Processing pending animation for:", pendingAnimationRef.current.id);
             setTimeout(() => {
@@ -82,28 +78,23 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       const origin = shipment.origin.coordinates;
       const destination = shipment.destination.coordinates;
       
-      // Create a bounds that includes both points
       const bounds = new mapboxgl.LngLatBounds()
         .extend(origin)
         .extend(destination);
       
-      // Fit the map to these bounds
       map.fitBounds(bounds, {
         padding: 100,
         duration: 2000,
         essential: true
       });
       
-      // Get the route coordinates
       const routeFeature = createArcRoute(shipment, true);
       const routeCoordinates = (routeFeature.geometry as GeoJSON.LineString).coordinates as [number, number][];
       
-      // Cancel any existing animation
       if (animationFrame) {
         cancelAnimationFrame(animationFrame);
       }
       
-      // Update the line animation
       updateLineAnimation(map, routeCoordinates);
       
       if (animate) {
@@ -184,7 +175,6 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
 
   return (
     <div className="relative w-full h-full">
-      {/* Full-screen map container */}
       <MapContainer onMapLoad={handleMapLoad} />
       
       {mapLoaded && map && (
@@ -196,27 +186,24 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
         />
       )}
       
-      {/* Map HUD */}
       <MapHUD shipments={shipments} />
       
-      {/* Logo/Title */}
       <div className="absolute top-4 left-4 z-10">
-        <div className="bg-primary/80 px-3 py-2 rounded-md border border-accent/30 text-white flex items-center">
+        <div className="bg-primary/50 backdrop-blur-sm px-3 py-2 rounded-md border border-accent/30 text-white flex items-center">
           <span className="text-accent font-bold">AfriWave</span>
           <span className="ml-1 text-white font-medium">CargoLive™</span>
           <div className="ml-2 w-2 h-2 bg-accent rounded-full animate-pulse"></div>
         </div>
       </div>
       
-      {/* Controls */}
       <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
         {activeShipment && (
           <button
             onClick={toggleTracking}
-            className={`px-4 py-2 rounded-md font-medium transition-colors ${
+            className={`px-4 py-2 rounded-md font-medium transition-colors backdrop-blur-sm ${
               isTracking 
-                ? 'bg-accent text-primary shadow-md' 
-                : 'bg-primary/80 text-white hover:bg-primary'
+                ? 'bg-accent/80 text-primary shadow-md' 
+                : 'bg-primary/50 text-white hover:bg-primary/60'
             }`}
           >
             {isTracking ? 'CargoLive™ Active' : 'Start CargoLive™'}
@@ -225,15 +212,14 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
         
         <button
           onClick={startItineraryAnimation}
-          className="px-4 py-2 rounded-md font-medium bg-secondary/80 text-white hover:bg-secondary transition-colors"
+          className="px-4 py-2 rounded-md font-medium bg-secondary/50 backdrop-blur-sm text-white hover:bg-secondary/60 transition-colors"
         >
           Animate All Routes
         </button>
       </div>
       
-      {/* Active shipment info */}
       {activeShipment && (
-        <div className="absolute bottom-4 left-4 z-10 bg-primary/90 p-3 rounded-md border border-accent/30 text-white max-w-xs">
+        <div className="absolute bottom-4 left-4 z-10 bg-primary/70 backdrop-blur-sm p-3 rounded-md border border-accent/30 text-white max-w-xs">
           <div className="flex items-center">
             <h3 className="text-accent font-semibold">Supply Chain Pulse™</h3>
             <button 
@@ -267,12 +253,10 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
         </div>
       )}
       
-      {/* Tooltip for hovered shipment */}
       {hoveredShipment && (
         <ShipmentTooltip shipment={hoveredShipment} />
       )}
       
-      {/* Weather info for selected location */}
       {selectedLocation && (
         <WeatherInfo
           location={selectedLocation}

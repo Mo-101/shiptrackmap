@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -66,7 +65,7 @@
   
   /* Enhanced utility classes for ultra-futuristic design */
   .glass-panel {
-    @apply bg-primary/90 backdrop-blur-md border border-secondary/30 shadow-md;
+    @apply bg-primary/50 backdrop-blur-sm border border-secondary/30 shadow-md;
   }
   
   .data-grid {
@@ -74,7 +73,7 @@
   }
   
   .data-card {
-    @apply bg-primary/95 backdrop-blur-md p-4 rounded-lg border border-secondary/20 shadow-lg;
+    @apply bg-primary/50 backdrop-blur-sm p-4 rounded-lg border border-secondary/20 shadow-lg;
   }
   
   .animated-border {

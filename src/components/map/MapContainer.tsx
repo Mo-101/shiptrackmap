@@ -66,9 +66,9 @@ const MapContainer: React.FC<MapContainerProps> = ({ onMapLoad }) => {
     <div className="relative w-full h-full">
       <div ref={mapContainer} className="absolute inset-0" style={{ width: '100%', height: '100%' }} />
       
-      {/* Loading state */}
+      {/* Loading state - making it more transparent */}
       {!mapInitialized && (
-        <div className="absolute inset-0 bg-primary/90 flex items-center justify-center z-50">
+        <div className="absolute inset-0 bg-primary/70 flex items-center justify-center z-50">
           <div className="text-center">
             <div className="text-accent text-3xl font-bold mb-4">AfriWave CargoLive™</div>
             <div className="w-64 h-1 bg-secondary/30 rounded-full mb-6 overflow-hidden mx-auto">
@@ -77,7 +77,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ onMapLoad }) => {
             <div className="text-white text-lg">Initializing map...</div>
             
             {mapError && (
-              <div className="mt-4 text-red-500 bg-primary/80 p-2 rounded border border-red-400 max-w-md mx-auto">
+              <div className="mt-4 text-red-500 bg-primary/50 p-2 rounded border border-red-400 max-w-md mx-auto">
                 {mapError}
               </div>
             )}

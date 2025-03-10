@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Shipment } from '../types/shipment';
 import { Activity, AlertCircle, FileBox, Map, Shield, Waves, Radio, Zap, Layers } from 'lucide-react';
@@ -86,30 +85,30 @@ const MapHUD: React.FC<MapHUDProps> = ({ shipments }) => {
 
   return (
     <>
-      {/* Sci-fi overlay elements - enhanced grid pattern and glowing edges */}
+      {/* Sci-fi overlay elements - more transparent grid pattern and subtle glowing edges */}
       <div className="absolute inset-0 pointer-events-none">
-        {/* Grid pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(79,243,248,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(79,243,248,0.05)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+        {/* Grid pattern - more transparent */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(79,243,248,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(79,243,248,0.03)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
         
-        {/* Corner markers */}
-        <div className="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-accent/40"></div>
-        <div className="absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2 border-accent/40"></div>
-        <div className="absolute bottom-0 left-0 w-16 h-16 border-b-2 border-l-2 border-accent/40"></div>
-        <div className="absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-accent/40"></div>
+        {/* Corner markers - more subtle */}
+        <div className="absolute top-0 left-0 w-16 h-16 border-t border-l border-accent/20"></div>
+        <div className="absolute top-0 right-0 w-16 h-16 border-t border-r border-accent/20"></div>
+        <div className="absolute bottom-0 left-0 w-16 h-16 border-b border-l border-accent/20"></div>
+        <div className="absolute bottom-0 right-0 w-16 h-16 border-b border-r border-accent/20"></div>
         
-        {/* Edge indicators */}
-        <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-accent/30 to-transparent"></div>
-        <div className="absolute inset-y-0 left-0 w-[1px] bg-gradient-to-b from-transparent via-accent/30 to-transparent"></div>
-        <div className="absolute inset-y-0 right-0 w-[1px] bg-gradient-to-b from-transparent via-accent/30 to-transparent"></div>
-        <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-accent/30 to-transparent"></div>
+        {/* Edge indicators - more transparent */}
+        <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-accent/20 to-transparent"></div>
+        <div className="absolute inset-y-0 left-0 w-[1px] bg-gradient-to-b from-transparent via-accent/20 to-transparent"></div>
+        <div className="absolute inset-y-0 right-0 w-[1px] bg-gradient-to-b from-transparent via-accent/20 to-transparent"></div>
+        <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-accent/20 to-transparent"></div>
       </div>
       
-      {/* Scanner line effects */}
-      <div className="absolute inset-x-0 top-1/4 scanner-line"></div>
-      <div className="absolute inset-x-0 top-2/4 scanner-line" style={{animationDelay: '2s'}}></div>
-      <div className="absolute inset-x-0 top-3/4 scanner-line" style={{animationDelay: '4s'}}></div>
+      {/* Scanner line effects - more transparent */}
+      <div className="absolute inset-x-0 top-1/4 scanner-line opacity-30"></div>
+      <div className="absolute inset-x-0 top-2/4 scanner-line opacity-30" style={{animationDelay: '2s'}}></div>
+      <div className="absolute inset-x-0 top-3/4 scanner-line opacity-30" style={{animationDelay: '4s'}}></div>
       
-      {/* System status panel - top right */}
+      {/* System status panel - top right, more transparent */}
       <div className="absolute top-4 right-4 glass-panel p-3 rounded-md shadow-lg border border-accent/20 hidden md:block">
         <div className="text-xs text-accent font-mono mb-2 flex items-center gap-2">
           <span className="inline-block h-2 w-2 rounded-full bg-accent animate-pulse"></span>
@@ -151,7 +150,7 @@ const MapHUD: React.FC<MapHUDProps> = ({ shipments }) => {
         </div>
       </div>
       
-      {/* Legend with enhanced styling */}
+      {/* Legend with enhanced styling - more transparent */}
       <div className="absolute bottom-4 right-4 glass-panel p-3 rounded-md shadow-lg border border-accent/20 text-xs font-mono hidden sm:block">
         <div className="text-accent mb-2 flex items-center gap-2">
           <Map size={14} />
@@ -173,13 +172,13 @@ const MapHUD: React.FC<MapHUDProps> = ({ shipments }) => {
         </div>
       </div>
       
-      {/* Time indicator with digital clock */}
+      {/* Time indicator with digital clock - more transparent */}
       <div className="absolute top-4 left-4 glass-panel p-3 rounded-md shadow-lg border border-accent/20 hidden md:block">
         <div className="text-xs text-white/60 font-mono mb-1">SYSTEM TIME</div>
         <DigitalClock />
       </div>
       
-      {/* Status display with animated indicators */}
+      {/* Status display with animated indicators - more transparent */}
       <div className="absolute top-24 left-4 glass-panel p-3 rounded-md shadow-lg border border-accent/20 hidden lg:block">
         <div className="text-xs text-accent font-mono mb-2 flex items-center gap-2">
           <Activity size={14} />
@@ -213,8 +212,8 @@ const MapHUD: React.FC<MapHUDProps> = ({ shipments }) => {
       {/* Enhanced emergency response panel */}
       <EmergencyResponsePanel />
       
-      {/* Central HUD element - subtle compass/directional indicator */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 pointer-events-none opacity-20">
+      {/* Central HUD element - subtle compass/directional indicator - very transparent */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 pointer-events-none opacity-10">
         <div className="absolute inset-0 border-2 border-accent/30 rounded-full"></div>
         <div className="absolute inset-2 border border-accent/20 rounded-full"></div>
         <div className="absolute inset-0 flex items-center justify-center">
