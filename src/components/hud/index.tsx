@@ -14,7 +14,7 @@ interface MapHUDProps {
   shipments: Shipment[];
 }
 
-const MapHUD: React.FC<MapHUDProps> = ({ shipments }) => {
+export const MapHUD: React.FC<MapHUDProps> = ({ shipments }) => {
   return (
     <div className="relative h-full w-full">
       {/* Grid background */}
@@ -46,8 +46,6 @@ const MapHUD: React.FC<MapHUDProps> = ({ shipments }) => {
     </div>
   );
 };
-
-export default MapHUD;
 
 export {
   EmergencyResponsePanel,

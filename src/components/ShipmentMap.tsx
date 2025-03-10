@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Shipment } from '../types/shipment';
 import WeatherInfo from './WeatherInfo';
 import ShipmentTooltip from './ShipmentTooltip';
-import MapHUD from './hud';
+import { MapHUD } from './hud';
 import { 
   createLineAnimation, 
   updateLineAnimation, 
