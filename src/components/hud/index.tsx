@@ -8,7 +8,6 @@ interface MapHUDProps {
   shipments: Shipment[];
 }
 
-// Export as named export for proper importing
 export const MapHUD: React.FC<MapHUDProps> = ({ shipments }) => {
   return (
     <div className="relative h-full w-full pointer-events-none">
