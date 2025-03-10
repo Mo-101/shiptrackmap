@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -11,19 +12,23 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221 100% 36%;
+    
+    /* Ultra-futuristic darker color scheme */
+    --primary: 219 64% 13%;       /* Dark deep blue */
     --primary-foreground: 210 40% 98%;
-    --secondary: 199 100% 44%;
+    --secondary: 183 81% 35%;     /* Vibrant teal */
     --secondary-foreground: 210 40% 98%;
+    
+    --accent: 175 98% 60%;        /* Electric cyan - for glowing elements */
+    --accent-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 221 100% 36%;
+    --ring: 221 83% 53%;
     --radius: 0.5rem;
   }
 
@@ -35,6 +40,7 @@
     @apply bg-background text-foreground;
     margin: 0;
     padding: 0;
+    font-family: 'Inter', sans-serif;
   }
 
   .mapboxgl-map {
@@ -42,11 +48,11 @@
   }
 
   .shipment-card {
-    @apply bg-white rounded-lg shadow-lg p-4 mb-4 cursor-pointer transition-all hover:shadow-xl;
+    @apply bg-primary/80 backdrop-blur-md border border-secondary/20 rounded-lg shadow-lg p-4 mb-4 cursor-pointer transition-all hover:shadow-xl hover:border-accent/50;
   }
 
   .shipment-card.active {
-    @apply ring-2 ring-primary;
+    @apply ring-2 ring-accent border-accent/50 bg-primary/90;
   }
 
   .scrollbar-hide {
@@ -56,5 +62,167 @@
   
   .scrollbar-hide::-webkit-scrollbar {
     display: none;  /* Chrome, Safari and Opera */
+  }
+  
+  /* Enhanced utility classes for ultra-futuristic design */
+  .glass-panel {
+    @apply bg-primary/90 backdrop-blur-md border border-secondary/30 shadow-md;
+  }
+  
+  .data-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+  }
+  
+  .data-card {
+    @apply bg-primary/95 backdrop-blur-md p-4 rounded-lg border border-secondary/20 shadow-lg;
+  }
+  
+  .animated-border {
+    @apply relative after:absolute after:inset-0 after:border after:border-accent/50 after:rounded-lg after:animate-pulse;
+  }
+  
+  .scanner-line {
+    @apply absolute h-[2px] bg-accent/80 left-0 right-0 animate-scanner pointer-events-none;
+  }
+
+  .cyber-border {
+    @apply relative;
+    --border-width: 2px;
+    --border-accent-opacity: 0.5;
+  }
+
+  .cyber-border::before {
+    @apply content-[''] absolute;
+    top: calc(var(--border-width) * -1);
+    left: calc(var(--border-width) * -1);
+    height: calc(100% + var(--border-width) * 2);
+    width: calc(100% + var(--border-width) * 2);
+    background: linear-gradient(90deg, 
+      rgba(79,243,248,var(--border-accent-opacity)) 0%, 
+      rgba(79,243,248,0) 25%, 
+      rgba(79,243,248,0) 75%, 
+      rgba(79,243,248,var(--border-accent-opacity)) 100%);
+    border-radius: calc(var(--radius) + var(--border-width));
+    z-index: -1;
+    animation: cyberborder 3s linear infinite;
+  }
+
+  @keyframes cyberborder {
+    0% {
+      background-position: 0% 0%;
+    }
+    100% {
+      background-position: 200% 0%;
+    }
+  }
+
+  /* Futuristic neon text */
+  .neon-text {
+    @apply text-accent;
+    text-shadow: 0 0 5px theme('colors.accent.DEFAULT'), 
+                 0 0 10px theme('colors.accent.DEFAULT'),
+                 0 0 20px theme('colors.accent.DEFAULT');
+  }
+
+  /* New utility classes for the futuristic interface */
+  .terminal-text {
+    @apply font-mono text-xs tracking-wider;
+    animation: typing 4s steps(60, end);
+  }
+
+  .hologram {
+    @apply relative overflow-visible;
+    transform-style: preserve-3d;
+  }
+
+  .hologram::before, 
+  .hologram::after {
+    @apply content-[''] absolute top-0 left-0 w-full h-full pointer-events-none;
+  }
+
+  .hologram::before {
+    @apply bg-accent/5;
+    filter: blur(20px);
+    transform: translateZ(-10px);
+  }
+
+  .hologram::after {
+    @apply border border-accent/20;
+    animation: hologram-pulse 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes hologram-pulse {
+    0% {
+      box-shadow: 0 0 5px 2px theme('colors.accent.DEFAULT/10');
+    }
+    100% {
+      box-shadow: 0 0 8px 4px theme('colors.accent.DEFAULT/30');
+    }
+  }
+
+  @keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+  }
+
+  /* Data visualization elements */
+  .data-stream {
+    height: 30px;
+    background: linear-gradient(90deg, 
+      rgba(79,243,248,0.1) 0%, 
+      rgba(79,243,248,0.3) 50%, 
+      rgba(79,243,248,0.1) 100%);
+    animation: data-flow 2s linear infinite;
+  }
+
+  @keyframes data-flow {
+    0% { 
+      transform: translateX(-100%);
+    }
+    100% { 
+      transform: translateX(100%);
+    }
+  }
+
+  .glitch {
+    position: relative;
+  }
+
+  .glitch::before,
+  .glitch::after {
+    @apply content-[attr(data-text)] absolute left-0 top-0 w-full h-full;
+    background: rgba(0,10,30,0.9);
+  }
+
+  .glitch::before {
+    left: 2px;
+    text-shadow: -2px 0 #4FF2F8;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim 5s infinite linear alternate-reverse;
+  }
+
+  .glitch::after {
+    left: -2px;
+    text-shadow: -2px 0 #F97316;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim2 5s infinite linear alternate-reverse;
+  }
+
+  @keyframes glitch-anim {
+    0% { clip: rect(16px, 9999px, 48px, 0); }
+    20% { clip: rect(42px, 9999px, 30px, 0); }
+    40% { clip: rect(76px, 9999px, 82px, 0); }
+    60% { clip: rect(25px, 9999px, 15px, 0); }
+    80% { clip: rect(13px, 9999px, 56px, 0); }
+    100% { clip: rect(32px, 9999px, 26px, 0); }
+  }
+
+  @keyframes glitch-anim2 {
+    0% { clip: rect(28px, 9999px, 35px, 0); }
+    20% { clip: rect(58px, 9999px, 17px, 0); }
+    40% { clip: rect(40px, 9999px, 56px, 0); }
+    60% { clip: rect(12px, 9999px, 67px, 0); }
+    80% { clip: rect(75px, 9999px, 82px, 0); }
+    100% { clip: rect(6px, 9999px, 46px, 0); }
   }
 }
