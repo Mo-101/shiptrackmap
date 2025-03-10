@@ -5,7 +5,7 @@ interface GridOverlayProps {
   opacity?: number;
 }
 
-const GridOverlay: React.FC<GridOverlayProps> = ({ opacity = 0.1 }) => {
+const GridOverlay: React.FC<GridOverlayProps> = ({ opacity = 0.05 }) => {
   return (
     <div className="absolute inset-0 z-10 pointer-events-none">
       <div 

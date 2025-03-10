@@ -5,7 +5,7 @@ interface CompassOverlayProps {
   opacity?: number;
 }
 
-const CompassOverlay: React.FC<CompassOverlayProps> = ({ opacity = 0.6 }) => {
+const CompassOverlay: React.FC<CompassOverlayProps> = ({ opacity = 0.4 }) => {
   return (
     <div className="relative pointer-events-none" style={{ opacity }}>
       <div className="border-2 border-accent/30 w-32 h-32 rounded-full flex items-center justify-center">
