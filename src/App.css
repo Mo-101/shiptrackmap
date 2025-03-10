@@ -5,7 +5,7 @@
   margin: 0;
   padding: 0;
   text-align: center;
-  background-color: transparent;
+  background-color: #0d1321;
   color: #f0f4f8;
 }
 
@@ -15,7 +15,6 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background-color: transparent;
 }
 
 /* Map specific styles */
@@ -78,7 +77,7 @@
     0 0 10px #4FF2F8;
 }
 
-/* Hologram effect - more transparent */
+/* Hologram effect */
 .hologram-effect {
   position: relative;
   overflow: hidden;
@@ -91,8 +90,8 @@
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(79, 243, 248, 0.05) 10%,
-    rgba(79, 243, 248, 0.05) 90%,
+    rgba(79, 243, 248, 0.1) 10%,
+    rgba(79, 243, 248, 0.1) 90%,
     transparent 100%
   );
   z-index: -1;

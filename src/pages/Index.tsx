@@ -41,7 +41,7 @@ const Index = () => {
   };
 
   return (
-    <div className="h-screen w-screen overflow-hidden flex flex-col bg-transparent">
+    <div className="h-screen w-screen overflow-hidden flex flex-col bg-primary">
       <NavHeader toggleSidebar={toggleSidebar} />
       
       <div className="flex flex-1 overflow-hidden">
