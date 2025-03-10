@@ -63,7 +63,7 @@ const MapContainer: React.FC<MapContainerProps> = ({ onMapLoad }) => {
   }, [onMapLoad, mapInitialized]);
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full z-10">
       <div ref={mapContainer} className="absolute inset-0" style={{ width: '100%', height: '100%' }} />
       
       {/* Loading state */}

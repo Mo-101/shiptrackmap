@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Shipment } from '../types/shipment';
 import WeatherInfo from './WeatherInfo';
 import ShipmentTooltip from './ShipmentTooltip';
-import MapHUD from './MapHUD';
+import MapHUD from './hud';
 import { 
   createLineAnimation, 
   updateLineAnimation, 
@@ -196,11 +196,13 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
         />
       )}
       
-      {/* Map HUD */}
-      <MapHUD shipments={shipments} />
+      {/* Map HUD - positioned above the map but with transparent backgrounds */}
+      <div className="absolute inset-0 pointer-events-none z-20">
+        <MapHUD shipments={shipments} />
+      </div>
       
       {/* Logo/Title */}
-      <div className="absolute top-4 left-4 z-10">
+      <div className="absolute top-4 left-4 z-30 pointer-events-auto">
         <div className="bg-primary/80 px-3 py-2 rounded-md border border-accent/30 text-white flex items-center">
           <span className="text-accent font-bold">AfriWave</span>
           <span className="ml-1 text-white font-medium">CargoLive™</span>
@@ -209,7 +211,7 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       </div>
       
       {/* Controls */}
-      <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+      <div className="absolute top-4 right-4 z-30 flex flex-col gap-2 pointer-events-auto">
         {activeShipment && (
           <button
             onClick={toggleTracking}
@@ -233,7 +235,7 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       
       {/* Active shipment info */}
       {activeShipment && (
-        <div className="absolute bottom-4 left-4 z-10 bg-primary/90 p-3 rounded-md border border-accent/30 text-white max-w-xs">
+        <div className="absolute bottom-4 left-4 z-30 bg-primary/90 p-3 rounded-md border border-accent/30 text-white max-w-xs pointer-events-auto">
           <div className="flex items-center">
             <h3 className="text-accent font-semibold">Supply Chain Pulse™</h3>
             <button 

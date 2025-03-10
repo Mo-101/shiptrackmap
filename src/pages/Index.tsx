@@ -41,22 +41,26 @@ const Index = () => {
   };
 
   return (
-    <div className="h-screen w-screen overflow-hidden flex flex-col bg-primary">
+    <div className="h-screen w-screen overflow-hidden flex flex-col bg-transparent">
       <NavHeader toggleSidebar={toggleSidebar} />
       
-      <div className="flex flex-1 overflow-hidden">
-        <ShipmentList
-          shipments={AFRICAN_SHIPMENTS}
-          activeShipment={activeShipment}
-          onShipmentSelect={setActiveShipment}
-          collapsed={sidebarCollapsed}
-          onToggleCollapse={toggleSidebar}
-        />
-        
-        <div className="flex-1 relative">
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* Map as background layer */}
+        <div className="absolute inset-0 z-0">
           <ShipmentMap
             shipments={AFRICAN_SHIPMENTS}
             activeShipment={activeShipment}
+          />
+        </div>
+        
+        {/* Shipment list with higher z-index */}
+        <div className="relative z-30">
+          <ShipmentList
+            shipments={AFRICAN_SHIPMENTS}
+            activeShipment={activeShipment}
+            onShipmentSelect={setActiveShipment}
+            collapsed={sidebarCollapsed}
+            onToggleCollapse={toggleSidebar}
           />
         </div>
       </div>
