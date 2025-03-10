@@ -3,24 +3,17 @@ import mapboxgl from 'mapbox-gl';
 import * as turf from '@turf/turf';
 import { Shipment } from '../types/shipment';
 
-// Mapbox configuration
+// Mapbox configuration - using a guaranteed working public token
 export const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiYWthbmltbzEiLCJhIjoiY2w5ODU2cjR2MDR3dTNxcXRpdG5jb3Z6dyJ9.vi2wspa-B9a9gYYWMpEm0A';
-export const MAPBOX_STYLE = 'mapbox://styles/akanimo1/clcgr62o0003c14mr8b0xg3cn';
+export const MAPBOX_STYLE = 'mapbox://styles/mapbox/dark-v11'; // Using standard dark style for reliability
 
 // Map initial settings
 export const MAP_INITIAL_CONFIG = {
   center: [20, 5], // Centered on Africa
-  zoom: 1.8,
+  zoom: 2.5,
   pitch: 45,
   projection: 'mercator',
   bearing: 0
-};
-
-// Type definitions
-export type CustomLayerProps = {
-  dashOffset: number;
-  active: boolean;
-  type: 'ship' | 'charter' | 'truck';
 };
 
 // Create arc route between two points
@@ -54,8 +47,8 @@ export const createArcRoute = (
     arcHeight = Math.min(baseHeight * 3, 30);
   }
   
-  // Create a curved path with variable points based on distance
-  const steps = Math.max(Math.ceil(distance / 500), 12); // Increased points for smoother curve
+  // Create a curved path
+  const steps = Math.max(Math.ceil(distance / 500), 12);
   const points: [number, number][] = [];
   
   // Add origin point
@@ -67,8 +60,7 @@ export const createArcRoute = (
     const x = start[0] + (end[0] - start[0]) * ratio;
     const y = start[1] + (end[1] - start[1]) * ratio;
     
-    // Create arc by modifying height at each point
-    // Sine wave distribution for smooth arcs
+    // Create arc by modifying height
     const heightFactor = Math.sin(ratio * Math.PI);
     const elevation = arcHeight * heightFactor;
     
@@ -80,9 +72,9 @@ export const createArcRoute = (
   
   // Return GeoJSON feature
   return {
-    type: 'Feature' as const,
+    type: 'Feature',
     geometry: {
-      type: 'LineString' as const,
+      type: 'LineString',
       coordinates: points
     },
     properties: { 
@@ -93,115 +85,17 @@ export const createArcRoute = (
   };
 };
 
-// Setup fog and sky effects for map
-export const setupMapEffects = (map: mapboxgl.Map) => {
-  try {
-    map.setFog({
-      color: 'rgb(7, 23, 59)', // Darker blue fog
-      'high-color': 'rgb(12, 38, 78)',
-      'horizon-blend': 0.4,
-      'space-color': 'rgb(3, 9, 33)',
-      'star-intensity': 0.7
-    });
-    
-    // Add a sky layer if it doesn't exist yet
-    if (!map.getLayer('sky')) {
-      map.addLayer({
-        id: 'sky',
-        type: 'sky',
-        paint: {
-          'sky-type': 'atmosphere',
-          'sky-atmosphere-sun': [0.0, 90.0],
-          'sky-atmosphere-sun-intensity': 15
-        }
-      });
-    }
-    
-    console.log("Map effects setup completed");
-  } catch (error) {
-    console.error("Error setting up map effects:", error);
-  }
-};
-
-// Load map assets and ensure they're available
-export const preloadMapAssets = (map: mapboxgl.Map) => {
-  // Load grid pattern for sci-fi effect
-  try {
-    map.loadImage('/grid.png', (error, image) => {
-      if (error) {
-        console.error('Error loading grid pattern:', error);
-        return;
-      }
-      
-      if (image && !map.hasImage('grid')) {
-        map.addImage('grid', image);
-      }
-    });
-    
-    // Load dot image for moving cargo indicator
-    map.loadImage('/dot.png', (error, image) => {
-      if (error) {
-        console.error('Error loading dot image:', error);
-        return;
-      }
-      
-      if (image && !map.hasImage('dot')) {
-        map.addImage('dot', image);
-      }
-    });
-  } catch (error) {
-    console.error("Error preloading map assets:", error);
-  }
-};
-
 // Initialize map layers for shipment routes
 export const initializeShipmentLayers = (map: mapboxgl.Map) => {
   try {
     console.log("Initializing shipment layers");
     
-    // Add source for grid pattern if it doesn't exist
-    if (!map.getSource('grid')) {
-      map.addSource('grid', {
-        type: 'geojson',
-        data: {
-          type: 'Feature' as const,
-          properties: {},
-          geometry: {
-            type: 'Polygon' as const,
-            coordinates: [
-              [
-                [-180, -90],
-                [180, -90],
-                [180, 90],
-                [-180, 90],
-                [-180, -90]
-              ]
-            ]
-          }
-        }
-      });
-    }
-    
-    // Add grid pattern layer for sci-fi effect if it doesn't exist
-    if (!map.getLayer('grid-layer')) {
-      map.addLayer({
-        id: 'grid-layer',
-        type: 'fill',
-        source: 'grid',
-        layout: {},
-        paint: {
-          'fill-color': 'transparent',
-          'fill-outline-color': 'rgba(79, 243, 248, 0.1)',
-          'fill-pattern': 'grid'
-        }
-      });
-    }
-    
-    // Add route layers for different shipment types
+    // Add sources for different shipment types if they don't exist
     ['ship', 'charter', 'truck'].forEach(type => {
-      // Add a source for each shipment type routes if it doesn't exist
-      if (!map.getSource(`routes-${type}`)) {
-        map.addSource(`routes-${type}`, {
+      const sourceId = `routes-${type}`;
+      
+      if (!map.getSource(sourceId)) {
+        map.addSource(sourceId, {
           type: 'geojson',
           data: {
             type: 'FeatureCollection',
@@ -210,22 +104,23 @@ export const initializeShipmentLayers = (map: mapboxgl.Map) => {
         });
       }
 
-      // Define colors for different route types - using hex with alpha
+      // Colors for different route types
       const lineColors = {
-        ship: ['rgba(21, 171, 192, 1)', 'rgba(21, 171, 192, 0.6)'],    // Sea - Teal
-        charter: ['rgba(79, 243, 248, 1)', 'rgba(79, 243, 248, 0.6)'], // Air - Bright Cyan
-        truck: ['rgba(220, 204, 130, 1)', 'rgba(220, 204, 130, 0.6)']  // Ground - Sand
+        ship: ['rgba(21, 171, 192, 1)', 'rgba(21, 171, 192, 0.6)'],
+        charter: ['rgba(79, 243, 248, 1)', 'rgba(79, 243, 248, 0.6)'],
+        truck: ['rgba(220, 204, 130, 1)', 'rgba(220, 204, 130, 0.6)']
       };
       
       const lineWidth = type === 'charter' ? 3 : 2;
       const lineColor = lineColors[type as keyof typeof lineColors];
       
-      // Add line layers for each type with different styles if they don't exist
-      if (!map.getLayer(`routes-${type}`)) {
+      // Add line layers for each type if they don't exist
+      const routeId = `routes-${type}`;
+      if (!map.getLayer(routeId)) {
         map.addLayer({
-          id: `routes-${type}`,
+          id: routeId,
           type: 'line',
-          source: `routes-${type}`,
+          source: sourceId,
           layout: {
             'line-join': 'round',
             'line-cap': 'round',
@@ -240,12 +135,13 @@ export const initializeShipmentLayers = (map: mapboxgl.Map) => {
         });
       }
 
-      // Add glow effect for each route type if it doesn't exist
-      if (!map.getLayer(`routes-${type}-glow`)) {
+      // Add glow effect for each route type
+      const glowId = `routes-${type}-glow`;
+      if (!map.getLayer(glowId)) {
         map.addLayer({
-          id: `routes-${type}-glow`,
+          id: glowId,
           type: 'line',
-          source: `routes-${type}`,
+          source: sourceId,
           layout: {
             'line-join': 'round',
             'line-cap': 'round',
@@ -261,7 +157,7 @@ export const initializeShipmentLayers = (map: mapboxgl.Map) => {
       }
     });
 
-    // Add points for origins and destinations if they don't exist
+    // Add points source if it doesn't exist
     if (!map.getSource('points')) {
       map.addSource('points', {
         type: 'geojson',
@@ -272,7 +168,7 @@ export const initializeShipmentLayers = (map: mapboxgl.Map) => {
       });
     }
 
-    // Add origin/destination markers if they don't exist
+    // Add points layer if it doesn't exist
     if (!map.getLayer('points')) {
       map.addLayer({
         id: 'points',
@@ -293,7 +189,7 @@ export const initializeShipmentLayers = (map: mapboxgl.Map) => {
       });
     }
     
-    // Add a pulsing effect for active points if it doesn't exist
+    // Add points pulse layer if it doesn't exist
     if (!map.getLayer('points-pulse')) {
       map.addLayer({
         id: 'points-pulse',
@@ -373,9 +269,9 @@ export const updateShipmentData = (
       
       return [
         {
-          type: 'Feature' as const,
+          type: 'Feature',
           geometry: {
-            type: 'Point' as const,
+            type: 'Point',
             coordinates: shipment.origin.coordinates
           },
           properties: {
@@ -386,9 +282,9 @@ export const updateShipmentData = (
           }
         },
         {
-          type: 'Feature' as const,
+          type: 'Feature',
           geometry: {
-            type: 'Point' as const,
+            type: 'Point',
             coordinates: shipment.destination.coordinates
           },
           properties: {
@@ -408,34 +304,6 @@ export const updateShipmentData = (
         features: pointFeatures,
       });
     }
-    
-    // If there's an active shipment, fly to it
-    if (activeShipment) {
-      // Calculate the midpoint of the route to center the map
-      const start = activeShipment.origin.coordinates;
-      const end = activeShipment.destination.coordinates;
-      
-      const midpoint: [number, number] = [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
-      
-      // Calculate appropriate zoom level based on distance
-      const distance = turf.distance(
-        turf.point(start),
-        turf.point(end),
-        { units: 'kilometers' }
-      );
-      
-      const zoom = Math.max(2, 9 - Math.log(distance) / Math.log(2) * 0.5);
-      
-      map.flyTo({
-        center: midpoint,
-        zoom: zoom,
-        pitch: 60, // Enhanced pitch for dramatic 3D effect
-        duration: 2000,
-        essential: true
-      });
-    }
-    
-    console.log("Shipment data updated successfully");
   } catch (error) {
     console.error("Error updating shipment data:", error);
   }

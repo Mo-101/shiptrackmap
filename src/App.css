@@ -17,6 +17,27 @@
   overflow: hidden;
 }
 
+/* Map specific styles */
+.mapboxgl-control-container {
+  z-index: 10;
+}
+
+.mapboxgl-canvas {
+  outline: none !important;
+}
+
+/* Fix for ResizeObserver errors */
+.mapboxgl-canvas-container {
+  height: 100%;
+  width: 100%;
+}
+
+/* Fix issue where the map doesn't display */
+.mapboxgl-map {
+  height: 100% !important;
+  width: 100% !important;
+}
+
 /* Ultra-futuristic elements */
 .futuristic-glow {
   filter: drop-shadow(0 0 5px #4FF2F8);
@@ -53,11 +74,10 @@
   color: #4FF2F8;
   text-shadow: 
     0 0 5px #4FF2F8,
-    0 0 10px #4FF2F8,
-    0 0 20px #4FF2F8;
+    0 0 10px #4FF2F8;
 }
 
-/* Holographic display */
+/* Hologram effect */
 .hologram-effect {
   position: relative;
   overflow: hidden;
@@ -77,32 +97,6 @@
   z-index: -1;
 }
 
-.hologram-effect::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    transparent 0%,
-    transparent 40%,
-    rgba(79, 243, 248, 0.05) 40.5%,
-    rgba(79, 243, 248, 0.05) 41%,
-    transparent 41.5%,
-    transparent 100%
-  );
-  background-size: 100% 4px;
-  animation: hologram-scan 4s linear infinite;
-  z-index: -1;
-}
-
-@keyframes hologram-scan {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 0 100%;
-  }
-}
-
 /* Scanner animation */
 @keyframes scanner {
   0% {
@@ -117,128 +111,7 @@
   animation: scanner 10s linear infinite;
 }
 
-/* Pulse animation for elements */
-@keyframes pulse-opacity {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.6;
-  }
-}
-
-.animate-pulse-opacity {
-  animation: pulse-opacity 2s infinite;
-}
-
-/* Gradient shift animation */
-@keyframes gradient-shift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.animate-gradient-shift {
-  animation: gradient-shift 6s ease infinite;
-}
-
-/* Arc animation for route lines */
-@keyframes arc-animation {
-  0% {
-    stroke-dashoffset: 1000;
-  }
-  100% {
-    stroke-dashoffset: 0;
-  }
-}
-
-.animate-arc-animation {
-  animation: arc-animation 3s ease-out forwards;
-}
-
-/* Data flow animation */
-.data-flow {
-  position: relative;
-  overflow: hidden;
-}
-
-.data-flow::after {
-  content: '';
-  position: absolute;
-  left: -100%;
-  top: 0;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(79, 243, 248, 0.3) 50%,
-    transparent 100%
-  );
-  animation: data-flow 2s linear infinite;
-}
-
-@keyframes data-flow {
-  0% {
-    left: -50%;
-  }
-  100% {
-    left: 100%;
-  }
-}
-
-/* Terminal text effect */
-.terminal-typing {
-  border-right: 2px solid #4FF2F8;
-  white-space: nowrap;
-  overflow: hidden;
-  animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
-}
-
-@keyframes typing {
-  from { width: 0 }
-  to { width: 100% }
-}
-
-@keyframes blink-caret {
-  from, to { border-color: transparent }
-  50% { border-color: #4FF2F8 }
-}
-
-/* Map specific styles */
-.mapboxgl-control-container {
-  display: none; /* Hide default mapbox controls for cleaner UI */
-}
-
-.mapboxgl-canvas {
-  outline: none !important;
-}
-
-/* Fix for ResizeObserver errors */
-.mapboxgl-canvas-container {
-  height: 100%;
-  width: 100%;
-  position: absolute;
-}
-
-/* Fix issue where the map doesn't display */
-.mapboxgl-map {
-  height: 100% !important;
-  width: 100% !important;
-}
-
-/* Ensure proper z-index for map controls */
-.mapboxgl-ctrl-top-right {
-  z-index: 10;
-}
-
-/* Fix for firefox */
+/* Firefox-specific fixes */
 @-moz-document url-prefix() {
   .mapboxgl-canvas {
     width: 100% !important;

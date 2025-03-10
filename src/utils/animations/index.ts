@@ -1,12 +1,13 @@
 
 import { createLineAnimation, updateLineAnimation } from './lineAnimation';
-import { createMovingDotAnimation } from './dotAnimation';
+import { createMovingDotAnimation, updateDotPosition } from './dotAnimation';
 import { animateShipmentRoute } from './routeAnimation';
 
 export {
   createLineAnimation,
   updateLineAnimation,
   createMovingDotAnimation,
+  updateDotPosition,
   animateShipmentRoute
 };
 
@@ -15,5 +16,6 @@ export default {
   createLineAnimation,
   updateLineAnimation,
   createMovingDotAnimation,
+  updateDotPosition,
   animateShipmentRoute
 };
