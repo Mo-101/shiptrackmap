@@ -1,59 +1,51 @@
 
 import React from 'react';
-import { Shipment } from '../../types/shipment';
+import GridOverlay from './GridOverlay';
+import CompassOverlay from './CompassOverlay';
 import EmergencyResponsePanel from './EmergencyResponsePanel';
 import DigitalClock from './DigitalClock';
-import StatusPanel from './StatusPanel';
-import SystemStatus from './SystemStatus';
-import TimePanel from './TimePanel';
-import RouteLegend from './RouteLegend';
-import CompassOverlay from './CompassOverlay';
-import GridOverlay from './GridOverlay';
+import ShipmentStatusPanel from './ShipmentStatusPanel';
+import { Shipment } from '../../types/shipment';
 
 interface MapHUDProps {
   shipments: Shipment[];
 }
 
+// Export as named export for proper importing
 export const MapHUD: React.FC<MapHUDProps> = ({ shipments }) => {
   return (
-    <div className="relative h-full w-full">
-      {/* Grid background */}
-      <GridOverlay />
+    <div className="relative h-full w-full pointer-events-none">
+      {/* Grid background - reduced opacity and made transparent */}
+      <GridOverlay opacity={0.1} />
       
-      {/* Center compass */}
-      <CompassOverlay />
-      
-      {/* Top-right panels */}
-      <div className="absolute top-16 right-4 z-20 pointer-events-auto">
-        <TimePanel />
-        <StatusPanel shipments={shipments} />
-        <SystemStatus />
-      </div>
-      
-      {/* Bottom-right panels */}
-      <div className="absolute bottom-4 right-4 z-20 pointer-events-auto">
-        <RouteLegend />
-        <EmergencyResponsePanel />
-      </div>
-      
-      {/* Bottom-left clock */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+      {/* Digital display elements */}
+      <div className="absolute bottom-4 right-4 z-20 flex flex-col gap-3">
         <DigitalClock />
       </div>
       
-      {/* Scanner line effect */}
-      <div className="scanner-line top-1/3 z-10 opacity-20"></div>
+      {/* Compass overlay - reduced opacity */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20">
+        <CompassOverlay opacity={0.6} />
+      </div>
+      
+      {/* Emergency response panel */}
+      <div className="absolute top-4 right-4 z-20">
+        <EmergencyResponsePanel />
+      </div>
+      
+      {/* Shipment status panel */}
+      <div className="absolute top-16 right-4 z-20">
+        <ShipmentStatusPanel shipments={shipments} />
+      </div>
     </div>
   );
 };
 
+// Export other components
 export {
   EmergencyResponsePanel,
   DigitalClock,
-  StatusPanel,
-  SystemStatus,
-  TimePanel,
-  RouteLegend,
-  CompassOverlay,
-  GridOverlay
+  ShipmentStatusPanel,
+  GridOverlay,
+  CompassOverlay
 };

@@ -1,23 +1,20 @@
 
 import React from 'react';
 
-const GridOverlay: React.FC = () => {
+interface GridOverlayProps {
+  opacity?: number;
+}
+
+const GridOverlay: React.FC<GridOverlayProps> = ({ opacity = 0.1 }) => {
   return (
-    <div className="absolute inset-0 pointer-events-none z-10 opacity-20">
-      {/* Grid pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(79,243,248,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(79,243,248,0.02)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
-      
-      {/* Corner markers */}
-      <div className="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-accent/20"></div>
-      <div className="absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2 border-accent/20"></div>
-      <div className="absolute bottom-0 left-0 w-16 h-16 border-b-2 border-l-2 border-accent/20"></div>
-      <div className="absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-accent/20"></div>
-      
-      {/* Edge indicators */}
-      <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-accent/15 to-transparent"></div>
-      <div className="absolute inset-y-0 left-0 w-[1px] bg-gradient-to-b from-transparent via-accent/15 to-transparent"></div>
-      <div className="absolute inset-y-0 right-0 w-[1px] bg-gradient-to-b from-transparent via-accent/15 to-transparent"></div>
-      <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-accent/15 to-transparent"></div>
+    <div className="absolute inset-0 z-10 pointer-events-none">
+      <div 
+        className="w-full h-full bg-repeat" 
+        style={{ 
+          backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%234FF2F8\' fill-opacity=\'" + opacity + "\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'10\' cy=\'10\' r=\'1\'/%3E%3Cpath d=\'M0 0h20v1H0zM0 19h20v1H0zM0 0v20h1V0zM19 0v20h1V0z\'/%3E%3C/g%3E%3C/svg%3E")',
+          opacity: opacity 
+        }}
+      />
     </div>
   );
 };
