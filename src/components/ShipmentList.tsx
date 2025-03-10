@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Ship, Plane, Clock, ChevronDown, ChevronUp, 
-  ExternalLink, MapPin, Package, Truck, ChevronLeft, ChevronRight
-} from 'lucide-react';
+import { Ship, Plane, Clock, ChevronDown, ChevronUp, ExternalLink, MapPin, Package, Truck } from 'lucide-react';
 import { Shipment } from '../types/shipment';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 
@@ -11,28 +9,15 @@ interface ShipmentListProps {
   shipments: Shipment[];
   activeShipment?: Shipment;
   onShipmentSelect: (shipment: Shipment) => void;
-  collapsed?: boolean;
-  onToggleCollapse?: () => void;
 }
 
 const ShipmentList: React.FC<ShipmentListProps> = ({
   shipments,
   activeShipment,
   onShipmentSelect,
-  collapsed = false,
-  onToggleCollapse
 }) => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [timeDisplay, setTimeDisplay] = useState('');
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const now = new Date();
-      setTimeDisplay(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
@@ -45,6 +30,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({
     shipment.itemCategory.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Get the appropriate icon based on shipment type
   const getShipmentIcon = (type: string) => {
     switch(type) {
       case 'ship':
@@ -58,48 +44,13 @@ const ShipmentList: React.FC<ShipmentListProps> = ({
     }
   };
 
-  if (collapsed) {
-    return (
-      <div className="relative bg-palette-blue/90 backdrop-blur-md w-12 h-full overflow-hidden flex flex-col shadow-lg border-r border-palette-teal/10 transition-all duration-300">
-        <div className="flex-1 flex flex-col items-center pt-4 space-y-6">
-          <button 
-            onClick={onToggleCollapse}
-            className="bg-palette-mint/20 rounded-full p-1.5 hover:bg-palette-mint/30 transition-colors"
-          >
-            <ChevronRight className="h-4 w-4 text-palette-mint" />
-          </button>
-          
-          <div className="space-y-4 mt-4 flex flex-col items-center">
-            <Ship className="text-palette-teal h-5 w-5" />
-            <Plane className="text-palette-mint h-5 w-5" />
-            <Truck className="text-palette-sand h-5 w-5" />
-          </div>
-          
-          <div className="absolute bottom-4 left-0 right-0 flex flex-col items-center space-y-2">
-            <div className="h-2 w-2 rounded-full bg-palette-mint animate-pulse"></div>
-            <div className="h-2 w-2 rounded-full bg-palette-teal animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="relative bg-palette-blue/90 backdrop-blur-md w-80 h-full overflow-hidden flex flex-col shadow-lg border-r border-palette-teal/10 transition-all duration-300">
+    <div className="relative bg-palette-blue/90 backdrop-blur-md w-80 h-full overflow-hidden flex flex-col shadow-lg border-r border-palette-teal/10">
       <div className="flex flex-col p-4 gap-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Truck className="h-5 w-5 text-palette-mint" />
-            <span>Active Shipments</span>
-          </h2>
-          
-          <button 
-            onClick={onToggleCollapse}
-            className="bg-palette-darkblue/40 rounded-full p-1 hover:bg-palette-darkblue/60 transition-colors"
-          >
-            <ChevronLeft className="h-4 w-4 text-palette-mint" />
-          </button>
-        </div>
+        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+          <Truck className="h-5 w-5 text-palette-mint" />
+          <span>Active Shipments</span>
+        </h2>
         
         <div className="relative">
           <input
@@ -208,6 +159,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({
         )}
       </div>
       
+      {/* High-tech decorative elements */}
       <div className="border-t border-palette-teal/10 p-3 text-xs text-palette-mint/70 font-mono flex items-center justify-between bg-gradient-to-r from-palette-darkblue/50 to-transparent">
         <div>TOTAL: {filteredShipments.length} SHIPMENTS</div>
         <div className="flex gap-1">

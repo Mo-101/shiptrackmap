@@ -1,15 +1,15 @@
 
-import { type Config } from "tailwindcss";
-import { fontFamily } from "tailwindcss/defaultTheme";
+import type { Config } from "tailwindcss";
 
 export default {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
-	],
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
+  prefix: "",
   theme: {
     container: {
       center: true,
@@ -26,93 +26,82 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "#0C3A62",
+          foreground: "#ffffff",
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          DEFAULT: "#15ABC0",
+          foreground: "#ffffff",
         },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+        ocean: {
+          light: "#76A6B4",
+          DEFAULT: "#0C3A62",
+          dark: "#071777",
         },
-        muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+        shipping: {
+          light: "#E8F5E9",
+          DEFAULT: "#2E7D32",
+          dark: "#1B5E20",
         },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
-        },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
-        },
-        card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
-        },
-        // Updated palette based on the provided colors
+        // Updated color palette with darker blues
         palette: {
-          darkblue: "#1B243A", // Dark blue from color scheme
-          midblue: "#4C4389", // Purple-ish blue
-          teal: "#4FA3BA",    // Teal blue
-          mint: "#4FF2F8",    // Bright teal
-          sage: "#91A0A9",    // Sage gray
-          sand: "#DCCC82"     // Sand color (kept from original)
-        },
-      },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
-      },
-      fontFamily: {
-        sans: ["var(--font-sans)", ...fontFamily.sans],
-        mono: ["Space Mono", "monospace"],
+          darkblue: "#071777", // Darkest blue (background)
+          blue: "#0C3A62",     // Dark blue (primary)
+          teal: "#15ABC0",     // Teal blue
+          mint: "#62F3F7",     // Light mint/cyan
+          sage: "#76A6B4",     // Sage blue/gray
+          sand: "#DCCC82",     // Sand/beige
+        }
       },
       keyframes: {
-        "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
+        "fade-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
         },
-        "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
+        "slide-in": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(0)" },
         },
-        "scanner": {
-          "0%": { top: "0%" },
-          "100%": { top: "100%" }
+        "pulse-opacity": {
+          "0%, 100%": { opacity: "0.6" },
+          "50%": { opacity: "0.2" },
+        },
+        // Adding new animations for sci-fi effects
+        "scanner-line": {
+          "0%": { transform: "translateY(0%)" },
+          "100%": { transform: "translateY(100%)" },
+        },
+        "grid-flow": {
+          "0%": { backgroundPosition: "0% 0%" },
+          "100%": { backgroundPosition: "100% 100%" },
         },
         "blink": {
           "0%, 100%": { opacity: "1" },
-          "50%": { opacity: "0.3" }
+          "50%": { opacity: "0.3" },
         },
-        "pulse-opacity": {
-          "0%, 100%": { opacity: "1" },
-          "50%": { opacity: "0.6" }
+        "float": {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-10px)" },
         },
-        "gradient-shift": {
-          "0%": { backgroundPosition: "0% 50%" },
-          "50%": { backgroundPosition: "100% 50%" },
-          "100%": { backgroundPosition: "0% 50%" }
-        },
-        "arc-animation": {
-          "0%": { strokeDashoffset: "1000" },
-          "100%": { strokeDashoffset: "0" }
-        }
       },
       animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
-        "scanner": "scanner 10s linear infinite",
-        "blink": "blink 1.5s infinite",
-        "pulse-opacity": "pulse-opacity 2s infinite",
-        "gradient-shift": "gradient-shift 6s ease infinite",
-        "arc-animation": "arc-animation 3s ease-out forwards"
+        "fade-in": "fade-in 0.5s ease-out",
+        "slide-in": "slide-in 0.5s ease-out",
+        "pulse-opacity": "pulse-opacity 2s ease-in-out infinite",
+        // Adding new animations
+        "scanner": "scanner-line 2s ease-in-out infinite",
+        "grid-flow": "grid-flow 20s linear infinite",
+        "blink": "blink 1.5s ease-in-out infinite",
+        "float": "float 3s ease-in-out infinite",
+      },
+      backgroundImage: {
+        "grid-pattern": "linear-gradient(rgba(98, 243, 247, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(98, 243, 247, 0.1) 1px, transparent 1px)",
+        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+      },
+      backgroundSize: {
+        "grid-50": "50px 50px",
       },
     },
   },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config
+} satisfies Config;
