@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Shipment } from '../types/shipment';
 import WeatherInfo from './WeatherInfo';
 import ShipmentTooltip from './ShipmentTooltip';
-import * as HUD from './hud'; // Changed from import MapHUD from './hud' to import * as HUD
+import MapHUD from './hud';
 import { 
   createLineAnimation, 
   updateLineAnimation, 
@@ -36,18 +35,15 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
     console.log("Map loaded successfully in ShipmentMap");
     
     try {
-      // Set the map
       setMap(loadedMap);
       setMapLoaded(true);
       
-      // Initialize layers with a slight delay to ensure map is ready
       setTimeout(() => {
         try {
           initializeShipmentLayers(loadedMap);
           createLineAnimation(loadedMap);
           createMovingDotAnimation(loadedMap);
           
-          // Process any pending animation
           if (pendingAnimationRef.current) {
             console.log("Processing pending animation for:", pendingAnimationRef.current.id);
             setTimeout(() => {
@@ -82,28 +78,23 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       const origin = shipment.origin.coordinates;
       const destination = shipment.destination.coordinates;
       
-      // Create a bounds that includes both points
       const bounds = new mapboxgl.LngLatBounds()
         .extend(origin)
         .extend(destination);
       
-      // Fit the map to these bounds
       map.fitBounds(bounds, {
         padding: 100,
         duration: 2000,
         essential: true
       });
       
-      // Get the route coordinates
       const routeFeature = createArcRoute(shipment, true);
       const routeCoordinates = (routeFeature.geometry as GeoJSON.LineString).coordinates as [number, number][];
       
-      // Cancel any existing animation
       if (animationFrame) {
         cancelAnimationFrame(animationFrame);
       }
       
-      // Update the line animation
       updateLineAnimation(map, routeCoordinates);
       
       if (animate) {
@@ -184,7 +175,6 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
 
   return (
     <div className="relative w-full h-full">
-      {/* Full-screen map container */}
       <MapContainer onMapLoad={handleMapLoad} />
       
       {mapLoaded && map && (
@@ -196,12 +186,10 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
         />
       )}
       
-      {/* Map HUD - positioned above the map but with transparent backgrounds */}
       <div className="absolute inset-0 pointer-events-none z-20">
-        <HUD.default shipments={shipments} />
+        <MapHUD shipments={shipments} />
       </div>
       
-      {/* Logo/Title */}
       <div className="absolute top-4 left-4 z-30 pointer-events-auto">
         <div className="bg-primary/80 px-3 py-2 rounded-md border border-accent/30 text-white flex items-center">
           <span className="text-accent font-bold">AfriWave</span>
@@ -210,7 +198,6 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
         </div>
       </div>
       
-      {/* Controls */}
       <div className="absolute top-4 right-4 z-30 flex flex-col gap-2 pointer-events-auto">
         {activeShipment && (
           <button
@@ -233,7 +220,6 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
         </button>
       </div>
       
-      {/* Active shipment info */}
       {activeShipment && (
         <div className="absolute bottom-4 left-4 z-30 bg-primary/90 p-3 rounded-md border border-accent/30 text-white max-w-xs pointer-events-auto">
           <div className="flex items-center">
@@ -269,12 +255,10 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
         </div>
       )}
       
-      {/* Tooltip for hovered shipment */}
       {hoveredShipment && (
         <ShipmentTooltip shipment={hoveredShipment} />
       )}
       
-      {/* Weather info for selected location */}
       {selectedLocation && (
         <WeatherInfo
           location={selectedLocation}

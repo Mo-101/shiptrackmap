@@ -48,6 +48,7 @@ const MapHUD: React.FC<MapHUDProps> = ({ shipments }) => {
 };
 
 export default MapHUD;
+
 export {
   EmergencyResponsePanel,
   DigitalClock,
