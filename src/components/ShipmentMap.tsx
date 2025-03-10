@@ -1,13 +1,16 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
-import * as turf from '@turf/turf';
 import { Shipment } from '../types/shipment';
 import WeatherInfo from './WeatherInfo';
 import ShipmentTooltip from './ShipmentTooltip';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import MapHUD from './MapHUD';
 import RadarPulse from './RadarPulse';
-import FreightLogo from './FreightLogo';
+import MapOverlay from './MapOverlay';
+import MapContainer from './MapContainer';
+import { generateMapRoutes } from '../utils/mapRouteGenerator';
+import { CustomLayerProps } from '../utils/mapAnimations';
 
 // Update to use the provided token
 mapboxgl.accessToken = 'pk.eyJ1IjoiYWthbmltbzEiLCJhIjoiY2w5ODU2cjR2MDR3dTNxcXRpdG5jb3Z6dyJ9.vi2wspa-B9a9gYYWMpEm0A';
@@ -16,13 +19,6 @@ interface ShipmentMapProps {
   shipments: Shipment[];
   activeShipment?: Shipment;
 }
-
-// Type for our custom layer properties
-type CustomLayerProps = {
-  dashOffset: number;
-  active: boolean;
-  type: 'ship' | 'charter' | 'truck';
-};
 
 const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -35,471 +31,31 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
   const animationFrameRef = useRef<number | null>(null);
   // Custom properties for different route types
   const routeProps = useRef<Record<string, CustomLayerProps>>({});
-  
-  useEffect(() => {
-    if (!mapContainer.current) return;
-
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/akanimo1/clcgr62o0003c14mr8b0xg3cn',
-      center: [20, 5],
-      zoom: 2,
-      pitch: 45,
-      projection: 'mercator'
-    });
-
-    // Add 3D terrain effect
-    map.current.on('style.load', () => {
-      map.current?.setFog({
-        color: 'rgb(7, 23, 119)', // Dark blue fog (palette.darkblue)
-        'high-color': 'rgb(12, 58, 98)', // palette.blue
-        'horizon-blend': 0.4,
-        'space-color': 'rgb(7, 16, 60)',
-        'star-intensity': 0.8
-      });
-      
-      // Add a sky layer
-      map.current?.addLayer({
-        id: 'sky',
-        type: 'sky',
-        paint: {
-          'sky-type': 'atmosphere',
-          'sky-atmosphere-sun': [0.0, 90.0],
-          'sky-atmosphere-sun-intensity': 15
-        }
-      });
-      
-      setMapLoaded(true);
-      
-      // Add source for grid pattern
-      map.current?.addSource('grid', {
-        type: 'geojson',
-        data: {
-          type: 'Feature',
-          properties: {},
-          geometry: {
-            type: 'Polygon',
-            coordinates: [
-              [
-                [-180, -90],
-                [180, -90],
-                [180, 90],
-                [-180, 90],
-                [-180, -90]
-              ]
-            ]
-          }
-        }
-      });
-      
-      // Add grid pattern layer for sci-fi effect
-      map.current?.addLayer({
-        id: 'grid-layer',
-        type: 'fill',
-        source: 'grid',
-        layout: {},
-        paint: {
-          'fill-color': 'transparent',
-          'fill-outline-color': 'rgba(98, 243, 247, 0.1)',
-          'fill-pattern': 'grid'
-        }
-      });
-      
-      // Add sources for different shipment types
-      ['ship', 'charter', 'truck'].forEach(type => {
-        // Add a source for each shipment type routes
-        map.current?.addSource(`routes-${type}`, {
-          type: 'geojson',
-          data: {
-            type: 'FeatureCollection',
-            features: [],
-          },
-        });
-
-        const lineColor = type === 'ship' ? '#15ABC0' : type === 'charter' ? '#62F3F7' : '#DCCC82';
-        const lineWidth = type === 'charter' ? 3 : 2;
-        
-        // Add line layers for each type with different styles
-        map.current?.addLayer({
-          id: `routes-${type}`,
-          type: 'line',
-          source: `routes-${type}`,
-          layout: {
-            'line-join': 'round',
-            'line-cap': 'round',
-            visibility: 'visible'
-          },
-          paint: {
-            'line-color': ['case', ['boolean', ['get', 'active'], false], lineColor, `${lineColor}99`],
-            'line-width': ['case', ['boolean', ['get', 'active'], false], lineWidth + 1, lineWidth],
-            'line-opacity': 0.8
-          },
-        });
-
-        // Add glow effect for each route type
-        map.current?.addLayer({
-          id: `routes-${type}-glow`,
-          type: 'line',
-          source: `routes-${type}`,
-          layout: {
-            'line-join': 'round',
-            'line-cap': 'round',
-            visibility: 'visible'
-          },
-          paint: {
-            'line-color': lineColor,
-            'line-width': lineWidth + 6,
-            'line-opacity': ['case', ['boolean', ['get', 'active'], false], 0.3, 0.1],
-            'line-blur': 3
-          },
-        });
-        
-        // Initialize custom props for animations
-        routeProps.current[type] = { dashOffset: 0, active: false, type: type as 'ship' | 'charter' | 'truck' };
-      });
-
-      // Add points for origins and destinations
-      map.current?.addSource('points', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: [],
-        },
-      });
-
-      // Add origin/destination markers
-      map.current?.addLayer({
-        id: 'points',
-        type: 'circle',
-        source: 'points',
-        paint: {
-          'circle-radius': ['match', ['get', 'type'], 'origin', 5, 'destination', 5, 3],
-          'circle-color': ['match', 
-            ['get', 'type'], 
-            'origin', '#15ABC0', 
-            'destination', '#62F3F7', 
-            '#76A6B4'
-          ],
-          'circle-stroke-width': 2,
-          'circle-stroke-color': '#FFFFFF',
-          'circle-opacity': 0.8
-        }
-      });
-      
-      // Add a pulsing effect for active points
-      map.current?.addLayer({
-        id: 'points-pulse',
-        type: 'circle',
-        source: 'points',
-        paint: {
-          'circle-radius': ['case', ['boolean', ['get', 'active'], false], 15, 0],
-          'circle-color': ['match', 
-            ['get', 'type'], 
-            'origin', '#15ABC0', 
-            'destination', '#62F3F7', 
-            '#76A6B4'
-          ],
-          'circle-opacity': ['case', ['boolean', ['get', 'active'], false], 0.5, 0],
-          'circle-stroke-width': 0
-        }
-      });
-      
-      // Start animations
-      startRouteAnimations();
-    });
-
-    // Add click and hover events
-    map.current.on('click', (e) => {
-      setSelectedLocation([e.lngLat.lng, e.lngLat.lat]);
-    });
-    
-    // Hover events for shipment routes
-    ['ship', 'charter', 'truck'].forEach(type => {
-      map.current?.on('mousemove', `routes-${type}`, (e) => {
-        if (e.features && e.features.length > 0) {
-          const shipmentId = e.features[0].properties?.shipmentId;
-          const foundShipment = shipments.find(s => s.id === shipmentId);
-          if (foundShipment) {
-            setHoveredShipment(foundShipment);
-            const canvas = map.current?.getCanvas();
-            if (canvas) {
-              canvas.style.cursor = 'pointer';
-            }
-          }
-        }
-      });
-      
-      map.current?.on('mouseleave', `routes-${type}`, () => {
-        setHoveredShipment(null);
-        const canvas = map.current?.getCanvas();
-        if (canvas) {
-          canvas.style.cursor = '';
-        }
-      });
-    });
-
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      map.current?.remove();
-    };
-  }, []);
-
-  // Function to animate routes with specific patterns for each shipment type
-  const startRouteAnimations = () => {
-    const animate = () => {
-      if (!map.current || !map.current.isStyleLoaded()) {
-        animationFrameRef.current = requestAnimationFrame(animate);
-        return;
-      }
-      
-      // Update each route type with different animations
-      if (routeProps.current['ship']) {
-        const shipOffset = (routeProps.current['ship'].dashOffset + 0.2) % 8;
-        routeProps.current['ship'].dashOffset = shipOffset;
-        
-        if (map.current.getLayer('routes-ship')) {
-          map.current.setPaintProperty('routes-ship', 'line-dasharray', [0.5, 1, 2, 1]);
-          // Using a custom property as TypeScript doesn't recognize 'line-dash-offset'
-          (map.current as any).setPaintProperty('routes-ship', 'line-dasharray-offset', shipOffset);
-        }
-      }
-      
-      if (routeProps.current['charter']) {
-        const charterOffset = (routeProps.current['charter'].dashOffset + 0.4) % 8;
-        routeProps.current['charter'].dashOffset = charterOffset;
-        
-        if (map.current.getLayer('routes-charter')) {
-          map.current.setPaintProperty('routes-charter', 'line-dasharray', [1, 3]);
-          // Using a custom property as TypeScript doesn't recognize 'line-dash-offset'
-          (map.current as any).setPaintProperty('routes-charter', 'line-dasharray-offset', charterOffset);
-        }
-      }
-      
-      if (routeProps.current['truck']) {
-        const truckOffset = (routeProps.current['truck'].dashOffset + 0.3) % 8;
-        routeProps.current['truck'].dashOffset = truckOffset;
-        
-        if (map.current.getLayer('routes-truck')) {
-          map.current.setPaintProperty('routes-truck', 'line-dasharray', [0.5, 1.5]);
-          // Using a custom property as TypeScript doesn't recognize 'line-dash-offset'
-          (map.current as any).setPaintProperty('routes-truck', 'line-dasharray-offset', truckOffset);
-        }
-      }
-      
-      // Pulse animation for points
-      const pulseSize = 5 + Math.sin(Date.now() / 500) * 5; // Pulsing radius
-      if (map.current.getLayer('points-pulse')) {
-        map.current.setPaintProperty('points-pulse', 'circle-radius', 
-          ['case', 
-            ['boolean', ['get', 'active'], false], 
-            pulseSize, 
-            0
-          ]
-        );
-        map.current.setPaintProperty('points-pulse', 'circle-opacity', 
-          ['case', 
-            ['boolean', ['get', 'active'], false], 
-            0.5 - Math.sin(Date.now() / 500) * 0.3, 
-            0
-          ]
-        );
-      }
-      
-      animationFrameRef.current = requestAnimationFrame(animate);
-    };
-    
-    animate();
-  };
 
   useEffect(() => {
     if (!mapLoaded || !map.current?.isStyleLoaded()) return;
 
-    // Create route features for each type of shipment
-    const shipRoutes: GeoJSON.Feature[] = [];
-    const charterRoutes: GeoJSON.Feature[] = [];
-    const truckRoutes: GeoJSON.Feature[] = [];
-    
-    shipments.forEach((shipment) => {
-      const start = shipment.origin.coordinates;
-      const end = shipment.destination.coordinates;
-      
-      const isActive = activeShipment?.id === shipment.id;
-      
-      // Create a curved line for air routes (charter)
-      if (shipment.type === 'charter') {
-        // Create a curved arc for flights
-        const midPoint = turf.midpoint(
-          turf.point(start),
-          turf.point(end)
-        );
-        
-        // Add elevation to create an arc
-        const midCoord = midPoint.geometry.coordinates;
-        const distance = turf.distance(turf.point(start), turf.point(end), { units: 'kilometers' });
-        const elevation = Math.min(distance * 0.1, 100); // Limit max height
-        
-        midCoord[2] = elevation;
-        
-        // Create a bezier curve
-        const line = turf.bezierSpline(turf.lineString([
-          start,
-          midCoord,
-          end
-        ]), { sharpness: 0.8 });
-        
-        // Add properties
-        line.properties = { 
-          active: isActive,
-          shipmentId: shipment.id, 
-          type: shipment.type
-        };
-        
-        charterRoutes.push(line);
-      } 
-      // Create slightly curved lines for sea routes (ship)
-      else if (shipment.type === 'ship') {
-        const line = turf.greatCircle(
-          turf.point(start),
-          turf.point(end),
-          { 
-            properties: { 
-              active: isActive,
-              shipmentId: shipment.id, 
-              type: shipment.type
-            },
-            npoints: 100
-          }
-        );
-        
-        shipRoutes.push(line);
-      }
-      // Create straight lines for ground routes (truck)
-      else if (shipment.type === 'truck') {
-        const line = turf.lineString(
-          [start, end],
-          { 
-            active: isActive,
-            shipmentId: shipment.id, 
-            type: shipment.type
-          }
-        );
-        
-        truckRoutes.push(line);
-      }
-    });
-
-    // Update route data for each type
-    if (map.current.getSource('routes-ship')) {
-      (map.current.getSource('routes-ship') as mapboxgl.GeoJSONSource).setData({
-        type: 'FeatureCollection',
-        features: shipRoutes,
-      });
-    }
-    
-    if (map.current.getSource('routes-charter')) {
-      (map.current.getSource('routes-charter') as mapboxgl.GeoJSONSource).setData({
-        type: 'FeatureCollection',
-        features: charterRoutes,
-      });
-    }
-    
-    if (map.current.getSource('routes-truck')) {
-      (map.current.getSource('routes-truck') as mapboxgl.GeoJSONSource).setData({
-        type: 'FeatureCollection',
-        features: truckRoutes,
-      });
-    }
-    
-    // Create point features for origins and destinations
-    const pointFeatures: GeoJSON.Feature[] = shipments.flatMap((shipment) => {
-      const isActive = activeShipment?.id === shipment.id;
-      
-      return [
-        {
-          type: 'Feature' as const,
-          geometry: {
-            type: 'Point' as const,
-            coordinates: shipment.origin.coordinates
-          },
-          properties: {
-            type: 'origin',
-            name: shipment.origin.name,
-            shipmentId: shipment.id,
-            active: isActive
-          }
-        },
-        {
-          type: 'Feature' as const,
-          geometry: {
-            type: 'Point' as const,
-            coordinates: shipment.destination.coordinates
-          },
-          properties: {
-            type: 'destination',
-            name: shipment.destination.name,
-            shipmentId: shipment.id,
-            active: isActive
-          }
-        }
-      ];
-    });
-    
-    // Update point data
-    if (map.current.getSource('points')) {
-      (map.current.getSource('points') as mapboxgl.GeoJSONSource).setData({
-        type: 'FeatureCollection',
-        features: pointFeatures,
-      });
-    }
-    
-    // If there's an active shipment, fly to it
-    if (activeShipment) {
-      // Calculate the midpoint of the route to center the map
-      const start = activeShipment.origin.coordinates;
-      const end = activeShipment.destination.coordinates;
-      
-      const midpoint: [number, number] = [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
-      
-      // Calculate appropriate zoom level based on distance
-      const distance = turf.distance(
-        turf.point(start),
-        turf.point(end),
-        { units: 'kilometers' }
-      );
-      
-      const zoom = Math.max(2, 9 - Math.log(distance) / Math.log(2) * 0.5);
-      
-      map.current.flyTo({
-        center: midpoint,
-        zoom: zoom,
-        duration: 2000,
-        essential: true
-      });
-    }
+    generateMapRoutes(map.current, shipments, activeShipment);
   }, [shipments, activeShipment, mapLoaded]);
 
   return (
     <div className="relative w-full h-full bg-palette-darkblue">
       <div ref={mapContainer} className="absolute inset-0" />
       
+      {/* Initialize the map */}
+      <MapContainer
+        mapContainer={mapContainer}
+        map={map}
+        routeProps={routeProps}
+        animationFrameRef={animationFrameRef}
+        shipments={shipments}
+        setMapLoaded={setMapLoaded}
+        setSelectedLocation={setSelectedLocation}
+        setHoveredShipment={setHoveredShipment}
+      />
+      
       {/* Sci-fi overlay elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        {/* Grid pattern overlay */}
-        <div className="absolute inset-0 bg-grid-pattern bg-grid-50 opacity-5" />
-        
-        {/* Edge highlights */}
-        <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-palette-mint/30 to-transparent" />
-        <div className="absolute inset-y-0 left-0 w-[1px] bg-gradient-to-b from-transparent via-palette-mint/30 to-transparent" />
-        <div className="absolute inset-y-0 right-0 w-[1px] bg-gradient-to-b from-transparent via-palette-mint/30 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-palette-mint/30 to-transparent" />
-        
-        {/* Scanner effect */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute inset-x-0 h-[2px] bg-palette-mint/20 animate-scanner" />
-        </div>
-      </div>
+      <MapOverlay />
       
       {/* HUD Components */}
       <MapHUD 
