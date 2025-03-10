@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -43,14 +42,13 @@ export default {
           DEFAULT: "#2E7D32",
           dark: "#1B5E20",
         },
-        // Updated color palette with darker blues
         palette: {
-          darkblue: "#071777", // Darkest blue (background)
-          blue: "#0C3A62",     // Dark blue (primary)
-          teal: "#15ABC0",     // Teal blue
-          mint: "#62F3F7",     // Light mint/cyan
-          sage: "#76A6B4",     // Sage blue/gray
-          sand: "#DCCC82",     // Sand/beige
+          darkblue: "#071777",
+          blue: "#0C3A62",
+          teal: "#15ABC0",
+          mint: "#62F3F7",
+          sage: "#76A6B4",
+          sand: "#DCCC82",
         }
       },
       keyframes: {
@@ -66,10 +64,9 @@ export default {
           "0%, 100%": { opacity: "0.6" },
           "50%": { opacity: "0.2" },
         },
-        // Adding new animations for sci-fi effects
         "scanner-line": {
           "0%": { transform: "translateY(0%)" },
-          "100%": { transform: "translateY(100%)" },
+          "100%": { transform: "translateY(100vh)" }
         },
         "grid-flow": {
           "0%": { backgroundPosition: "0% 0%" },
@@ -88,8 +85,7 @@ export default {
         "fade-in": "fade-in 0.5s ease-out",
         "slide-in": "slide-in 0.5s ease-out",
         "pulse-opacity": "pulse-opacity 2s ease-in-out infinite",
-        // Adding new animations
-        "scanner": "scanner-line 2s ease-in-out infinite",
+        "scanner": "scanner-line 3s linear infinite",
         "grid-flow": "grid-flow 20s linear infinite",
         "blink": "blink 1.5s ease-in-out infinite",
         "float": "float 3s ease-in-out infinite",
