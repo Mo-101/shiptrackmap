@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Shipment } from '../types/shipment';
 import WeatherInfo from './WeatherInfo';
 import ShipmentTooltip from './ShipmentTooltip';
 import MapHUD from './MapHUD';
-import { createLineAnimation, updateLineAnimation, createMovingDotAnimation, animateShipmentRoute } from './MapAnimations';
+import { createLineAnimation, updateLineAnimation, createMovingDotAnimation, animateShipmentRoute } from '../utils/animations';
 import MapContainer from './map/MapContainer';
 import MapEvents from './map/MapEvents';
 import { initializeShipmentLayers, updateShipmentData, createArcRoute } from '../utils/mapUtils';
@@ -26,7 +25,6 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
   const [activeAnimation, setActiveAnimation] = useState<string | null>(null);
   const [mapInitError, setMapInitError] = useState<string | null>(null);
   
-  // Use a ref to track if animation was attempted before map was ready
   const pendingAnimationRef = useRef<Shipment | null>(null);
 
   const handleMapLoad = (loadedMap: mapboxgl.Map) => {
@@ -39,7 +37,6 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       setMap(loadedMap);
       setMapLoaded(true);
       
-      // Check if we have a pending animation
       if (pendingAnimationRef.current) {
         console.log("Processing pending animation for:", pendingAnimationRef.current.id);
         setTimeout(() => {
@@ -48,7 +45,6 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
         }, 1000);
       }
       
-      // Welcome toast for AfriWave CargoLive™
       toast({
         title: 'AfriWave CargoLive™',
         description: 'Welcome to the cutting-edge shipment tracker dashboard',
@@ -60,7 +56,6 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
     }
   };
 
-  // Jump to shipment animation
   const jumpToShipment = useCallback((shipment: Shipment, animate: boolean = true) => {
     if (!map || !map.loaded()) {
       console.log("Map not ready, setting pending animation for:", shipment.id);
@@ -73,42 +68,32 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       const origin = shipment.origin.coordinates;
       const destination = shipment.destination.coordinates;
       
-      // Calculate bounds that include both origin and destination
       const bounds = new mapboxgl.LngLatBounds()
         .extend(origin)
         .extend(destination);
       
-      // Fly to the bounding box with animation
       map.fitBounds(bounds, {
         padding: 100,
         duration: 2000,
-        pitch: 60, // Dramatic pitch for better visualization
+        pitch: 60,
         essential: true
       });
       
-      // Get route coordinates from arc route
       const routeFeature = createArcRoute(shipment, true);
-      // Access coordinates with type assertion
       const routeCoordinates = (routeFeature.geometry as GeoJSON.LineString).coordinates as [number, number][];
       
-      // Cancel any existing animation
       if (animationFrame) {
         cancelAnimationFrame(animationFrame);
       }
       
-      // Update the tracking line
       updateLineAnimation(map, routeCoordinates);
       
-      // Start the animation of the cargo moving along the route
       if (animate) {
         setActiveAnimation(shipment.id);
-        // Calculate animation duration based on distance (longer routes = slower animation)
-        const duration = Math.max(8000, routeCoordinates.length * 1000); // min 8 seconds
+        const duration = Math.max(8000, routeCoordinates.length * 1000);
         const animationId = animateShipmentRoute(map, routeCoordinates, duration);
-        // Fixed: Use the returned animation frame ID directly (number type)
         setAnimationFrame(animationId);
         
-        // Show toast notification
         toast({
           title: `CargoLive™ Tracking: ${shipment.id}`,
           description: `From ${shipment.origin.name} to ${shipment.destination.name}`,
@@ -126,14 +111,12 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
     }
   }, [map, animationFrame]);
 
-  // Update map data when shipments or active shipment changes
   useEffect(() => {
     if (!map || !map.loaded()) return;
     
     try {
       updateShipmentData(map, shipments, activeShipment);
       
-      // If there's an active shipment, we can enable tracking
       if (activeShipment && isTracking) {
         jumpToShipment(activeShipment, true);
       }
@@ -142,7 +125,6 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
     }
   }, [shipments, activeShipment, mapLoaded, map, isTracking, jumpToShipment]);
 
-  // Toggle tracking function
   const toggleTracking = () => {
     setIsTracking(prev => {
       const newState = !prev;
@@ -153,14 +135,11 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
     });
   };
 
-  // Jump to a random shipment every 10 seconds for demo purposes
   const startItineraryAnimation = () => {
-    // Clear any existing animation
     if (animationFrame) {
       cancelAnimationFrame(animationFrame);
     }
     
-    // Show toast for feature activation
     toast({
       title: 'CargoLive™ Itinerary Animation',
       description: 'Visualizing cargo movements across Africa',
@@ -178,7 +157,7 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       
       const frame = setTimeout(() => {
         requestAnimationFrame(animateItineraries);
-      }, 12000); // Change shipment every 12 seconds (including animation duration)
+      }, 12000);
       
       setAnimationFrame(frame as unknown as number);
     };
@@ -186,7 +165,6 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
     animateItineraries();
   };
 
-  // View single shipment with animation
   const viewShipmentAnimation = (shipment: Shipment) => {
     if (activeAnimation === shipment.id) return;
     
@@ -208,7 +186,6 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       
       <MapHUD shipments={shipments} />
       
-      {/* AfriWave CargoLive™ branding */}
       <div className="absolute top-4 left-4 z-10 flex items-center">
         <div className="bg-primary/80 backdrop-blur-md px-3 py-2 rounded-md border border-accent/30 text-white flex items-center tech-border">
           <span className="text-accent font-bold neon-text">AfriWave</span>
@@ -217,7 +194,6 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
         </div>
       </div>
       
-      {/* Control Panel - top right */}
       <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
         {activeShipment && (
           <button
@@ -240,7 +216,6 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
         </button>
       </div>
       
-      {/* Active shipment indicator - bottom left */}
       {activeShipment && (
         <div className="absolute bottom-4 left-4 z-10 bg-primary/90 backdrop-blur-sm p-3 rounded-md border border-accent/30 text-white max-w-xs hologram-effect">
           <div className="flex items-center">
@@ -287,7 +262,6 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
         />
       )}
       
-      {/* Display initialization error if any */}
       {mapInitError && (
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-red-900/80 text-white p-4 rounded-md border border-red-500 max-w-md">
           <h3 className="text-xl font-bold mb-2">Map Error</h3>
