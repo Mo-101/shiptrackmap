@@ -302,6 +302,7 @@ const Analytics: React.FC = () => {
               </div>
             </div>
           ) : activeTab === 'overview' ? (
+            
             <div className="grid grid-cols-12 gap-3">
               {/* Left sidebar with KPIs */}
               <div className="col-span-3 grid grid-cols-2 gap-2">
@@ -668,4 +669,4 @@ const Analytics: React.FC = () => {
                 <div className="col-span-3">
                   {/* Top Destinations */}
                   <div className="bg-palette-blue/30 p-3 rounded-md border border-palette-mint/20">
-                    <h3 className="text-
+                    <h3 className="
