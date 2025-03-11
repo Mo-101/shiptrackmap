@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -10,7 +9,7 @@ import {
   PieChart, Pie, Cell, 
   BarChart, Bar, XAxis, YAxis, 
   Tooltip, Legend, ResponsiveContainer, 
-  AreaChart, Area, LineChart, Line 
+  AreaChart, Area, LineChart, Line, CartesianGrid
 } from 'recharts';
 import { 
   getAggregatedAnalyticsData, 

@@ -44,11 +44,12 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) 
       
       {/* Initialize the map */}
       <MapContainer
+        shipments={shipments}
+        selectedShipment={activeShipment}
         mapContainer={mapContainer}
         map={map}
         routeProps={routeProps}
         animationFrameRef={animationFrameRef}
-        shipments={shipments}
         setMapLoaded={setMapLoaded}
         setSelectedLocation={setSelectedLocation}
         setHoveredShipment={setHoveredShipment}
