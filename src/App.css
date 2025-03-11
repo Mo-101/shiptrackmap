@@ -1,7 +1,8 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0;
   text-align: center;
 }
 
@@ -39,4 +40,72 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Advanced Animation Effect for analytics */
+@keyframes pulse-border {
+  0% {
+    box-shadow: 0 0 0 0 rgba(21, 171, 192, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(21, 171, 192, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(21, 171, 192, 0);
+  }
+}
+
+.tech-border {
+  position: relative;
+  overflow: hidden;
+}
+
+.tech-border::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(90deg, rgba(21, 171, 192, 0), rgba(21, 171, 192, 0.5), rgba(21, 171, 192, 0));
+  z-index: -1;
+  animation: border-shine 2s linear infinite;
+}
+
+@keyframes border-shine {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Prevent scrollbar from shifting content */
+body {
+  overflow-y: overlay;
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(21, 171, 192, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(21, 171, 192, 0.4);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(21, 171, 192, 0.6);
 }
