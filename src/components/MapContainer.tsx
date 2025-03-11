@@ -42,7 +42,7 @@ const MapContainer: React.FC<MapContainerProps> = ({
     if (mapRef.current) return;
     
     if (containerRef.current) {
-      mapRef.current = new mapboxgl.Map({
+      const mapInstance = new mapboxgl.Map({
         container: containerRef.current,
         style: 'mapbox://styles/mapbox/dark-v11',
         center: [36.8219, -1.2921], // Nairobi
@@ -52,16 +52,31 @@ const MapContainer: React.FC<MapContainerProps> = ({
         projection: { name: 'mercator' },
       });
       
-      mapRef.current.on('load', () => {
+      // Fix: use the variable instead of modifying the read-only ref directly
+      if (mapRef === localMap) {
+        localMap.current = mapInstance;
+      } else if (map && mapRef === map) {
+        // For external refs, we need to be careful
+        // This is a workaround since we cannot modify read-only refs directly
+        // The parent component should handle setting the ref value
+        (map as any).current = mapInstance;
+      }
+      
+      mapInstance.on('load', () => {
         setLocalMapLoaded(true);
         if (setMapLoaded) setMapLoaded(true);
       });
     }
     
     return () => {
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
+      // Fix: Only access current if it exists, don't try to modify the ref directly
+      if (mapRef === localMap && localMap.current) {
+        localMap.current.remove();
+        localMap.current = null;
+      } else if (map && mapRef === map && map.current) {
+        map.current.remove();
+        // Again, workaround for read-only refs
+        (map as any).current = null;
       }
     };
   }, [mapContainer, map, setMapLoaded]);
