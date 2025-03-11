@@ -21,11 +21,11 @@ const MapContainer: React.FC<MapContainerProps> = ({
   shipments, 
   selectedShipment, 
   setSelectedShipment,
-  mapContainer,
-  map,
+  mapContainer: externalMapContainer,
+  map: externalMap,
   routeProps,
   animationFrameRef,
-  setMapLoaded,
+  setMapLoaded: externalSetMapLoaded,
   setSelectedLocation,
   setHoveredShipment
 }) => {
@@ -36,8 +36,8 @@ const MapContainer: React.FC<MapContainerProps> = ({
   // Initialize map when component mounts
   useEffect(() => {
     // Use either passed-in refs or local refs
-    const containerRef = mapContainer || localMapContainer;
-    const mapRef = map || localMap;
+    const containerRef = externalMapContainer || localMapContainer;
+    const mapRef = externalMap || localMap;
     
     if (mapRef.current) return;
     
@@ -55,16 +55,16 @@ const MapContainer: React.FC<MapContainerProps> = ({
       // Fix: use the variable instead of modifying the read-only ref directly
       if (mapRef === localMap) {
         localMap.current = mapInstance;
-      } else if (map && mapRef === map) {
+      } else if (externalMap && mapRef === externalMap) {
         // For external refs, we need to be careful
         // This is a workaround since we cannot modify read-only refs directly
         // The parent component should handle setting the ref value
-        (map as any).current = mapInstance;
+        (externalMap as any).current = mapInstance;
       }
       
       mapInstance.on('load', () => {
         setLocalMapLoaded(true);
-        if (setMapLoaded) setMapLoaded(true);
+        if (externalSetMapLoaded) externalSetMapLoaded(true);
       });
     }
     
@@ -73,16 +73,16 @@ const MapContainer: React.FC<MapContainerProps> = ({
       if (mapRef === localMap && localMap.current) {
         localMap.current.remove();
         localMap.current = null;
-      } else if (map && mapRef === map && map.current) {
-        map.current.remove();
+      } else if (externalMap && mapRef === externalMap && externalMap.current) {
+        externalMap.current.remove();
         // Again, workaround for read-only refs
-        (map as any).current = null;
+        (externalMap as any).current = null;
       }
     };
-  }, [mapContainer, map, setMapLoaded]);
+  }, [externalMapContainer, externalMap, externalSetMapLoaded]);
 
   return (
-    <div ref={mapContainer || localMapContainer} className="absolute inset-0 w-full h-full" />
+    <div ref={externalMapContainer || localMapContainer} className="absolute inset-0 w-full h-full" />
   );
 };
 
