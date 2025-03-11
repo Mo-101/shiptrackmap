@@ -823,7 +823,7 @@ const Analytics: React.FC = () => {
                             </div>
                             <p className="text-sm text-white/90">
                               <span className="font-medium block">Sea/Road First:</span>
-                              Shift >5,000 kg shipments to AGL (sea) or Siginon (road).
+                              Shift &gt;5,000 kg shipments to AGL (sea) or Siginon (road).
                             </p>
                           </div>
                           
@@ -843,7 +843,7 @@ const Analytics: React.FC = () => {
                             </div>
                             <p className="text-sm text-white/90">
                               <span className="font-medium block">DHL for Emergencies:</span>
-                              Use only for <100 kg urgent parcels (e.g., lab kits to Comoros).
+                              Use only for &lt;100 kg urgent parcels (e.g., lab kits to Comoros).
                             </p>
                           </div>
                         </div>
@@ -942,7 +942,7 @@ const Analytics: React.FC = () => {
                           <div className="bg-palette-blue/70 p-3 rounded-md mt-5">
                             <h5 className="text-palette-mint text-xs uppercase font-medium mb-2">Strategic Insight</h5>
                             <p className="text-sm text-white/90">
-                              DHL Express offers the fastest delivery times (2-4 days) with the highest on-time rate (95%), but comes at a premium cost. Optimal strategy: Use DHL for time-critical shipments <100kg, and Freight in Time for regular air freight.
+                              DHL Express offers the fastest delivery times (2-4 days) with the highest on-time rate (95%), but comes at a premium cost. Optimal strategy: Use DHL for time-critical shipments &lt;100kg, and Freight in Time for regular air freight.
                             </p>
                           </div>
                         </div>
