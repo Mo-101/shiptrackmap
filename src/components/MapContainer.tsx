@@ -33,7 +33,6 @@ const MapContainer: React.FC<MapContainerProps> = ({
         projection: { name: 'mercator' },
       });
       
-      // Use onload instead of directly mutating the read-only current property
       map.current.on('load', () => {
         setMapLoaded(true);
       });
