@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -669,4 +670,343 @@ const Analytics: React.FC = () => {
                 <div className="col-span-3">
                   {/* Top Destinations */}
                   <div className="bg-palette-blue/30 p-3 rounded-md border border-palette-mint/20">
-                    <h3
+                    <h3 className="text-white/80 text-sm mb-2">Top Destinations</h3>
+                    <div className="overflow-y-auto h-52 scrollbar-thin">
+                      {topDestinations.map((destination, index) => (
+                        <div key={index} className="mb-2 last:mb-0 flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <div className="h-2 w-2 rounded-full bg-palette-mint"></div>
+                            <span className="text-white text-xs">{destination.country}</span>
+                          </div>
+                          <span className="text-palette-mint text-xs">{formatCurrency(destination.volume)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : activeTab === 'details' ? (
+            // Details tab content
+            <div className="grid grid-cols-12 gap-4">
+              <div className="col-span-6">
+                <div className="bg-palette-blue/30 p-4 rounded-md border border-palette-mint/20">
+                  <h3 className="text-white/80 text-sm mb-4 flex items-center">
+                    <Database size={16} className="text-palette-mint mr-2" />
+                    Forwarder Performance Analysis
+                  </h3>
+                  <div className="relative">
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={forwarderPerformanceData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#15ABC0" opacity={0.2} />
+                          <XAxis dataKey="name" stroke="#15ABC0" />
+                          <YAxis stroke="#15ABC0" />
+                          <Tooltip
+                            contentStyle={{ 
+                              backgroundColor: '#071777', 
+                              borderColor: '#15ABC0',
+                              borderRadius: '4px'
+                            }}
+                          />
+                          <Legend />
+                          <Bar dataKey="leadTime" name="Lead Time (days)" fill="#62F3F7" />
+                          <Bar dataKey="onTimeRate" name="On-Time Delivery (%)" fill="#15ABC0" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="col-span-6">
+                <div className="bg-palette-blue/30 p-4 rounded-md border border-palette-mint/20">
+                  <h3 className="text-white/80 text-sm mb-4 flex items-center">
+                    <CircleDollarSign size={16} className="text-palette-mint mr-2" />
+                    Cost Efficiency by Carrier (USD/kg)
+                  </h3>
+                  <div className="relative">
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={costEfficiencyData} layout="vertical">
+                          <CartesianGrid strokeDasharray="3 3" stroke="#15ABC0" opacity={0.2} />
+                          <XAxis type="number" stroke="#15ABC0" />
+                          <YAxis type="category" dataKey="name" stroke="#15ABC0" />
+                          <Tooltip
+                            contentStyle={{ 
+                              backgroundColor: '#071777', 
+                              borderColor: '#15ABC0',
+                              borderRadius: '4px'
+                            }}
+                            formatter={(value) => [`$${value}/kg`, '']}
+                          />
+                          <Legend />
+                          <Bar dataKey="air" name="Air Freight" fill="#62F3F7" />
+                          <Bar dataKey="sea" name="Sea Freight" fill="#15ABC0" />
+                          <Bar dataKey="road" name="Road Freight" fill="#DCCC82" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="col-span-12">
+                <div className="bg-palette-blue/30 p-4 rounded-md border border-palette-mint/20">
+                  <h3 className="text-white/80 text-sm mb-4 flex items-center">
+                    <Layers size={16} className="text-palette-mint mr-2" />
+                    Power Grid: Logistics Territory Control
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full table-auto">
+                      <thead>
+                        <tr className="border-b border-palette-mint/20">
+                          <th className="text-left py-2 text-xs text-palette-mint">Country</th>
+                          <th className="text-left py-2 text-xs text-palette-mint">Dominant Carrier</th>
+                          <th className="text-left py-2 text-xs text-palette-mint">Challenger</th>
+                          <th className="text-left py-2 text-xs text-palette-mint">Unused Potential</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {powerGridData.map((entry, index) => (
+                          <tr key={index} className="border-b border-palette-mint/10 hover:bg-palette-mint/5">
+                            <td className="py-2 text-xs text-white">{entry.country}</td>
+                            <td className="py-2 text-xs text-white">{entry.overlord}</td>
+                            <td className="py-2 text-xs text-white">{entry.rebels}</td>
+                            <td className="py-2 text-xs text-white">{entry.unclaimed}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="col-span-6">
+                <div className="bg-palette-blue/30 p-4 rounded-md border border-palette-mint/20">
+                  <h3 className="text-white/80 text-sm mb-4 flex items-center">
+                    <FileWarning size={16} className="text-palette-mint mr-2" />
+                    Zero-Quote Markets &amp; Carrier Avoidance
+                  </h3>
+                  <div className="overflow-y-auto h-64 scrollbar-thin">
+                    <table className="w-full table-auto">
+                      <thead>
+                        <tr className="border-b border-palette-mint/20">
+                          <th className="text-left py-2 text-xs text-palette-mint">Forwarder</th>
+                          <th className="text-left py-2 text-xs text-palette-mint">Avoided Countries</th>
+                          <th className="text-left py-2 text-xs text-palette-mint">Stated Reason</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {zeroQuoteData.map((entry, index) => (
+                          <tr key={index} className="border-b border-palette-mint/10 hover:bg-palette-mint/5">
+                            <td className="py-2 text-xs text-white">{entry.forwarder}</td>
+                            <td className="py-2 text-xs text-white">{entry.countriesAvoided}</td>
+                            <td className="py-2 text-xs text-white">{entry.reason}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="col-span-6">
+                <div className="bg-palette-blue/30 p-4 rounded-md border border-palette-mint/20">
+                  <h3 className="text-white/80 text-sm mb-4 flex items-center">
+                    <ShieldAlert size={16} className="text-palette-mint mr-2" />
+                    Risk &amp; Sustainability Matrix
+                  </h3>
+                  <div className="overflow-y-auto h-64 scrollbar-thin">
+                    <table className="w-full table-auto">
+                      <thead>
+                        <tr className="border-b border-palette-mint/20">
+                          <th className="text-left py-2 text-xs text-palette-mint">Forwarder</th>
+                          <th className="text-left py-2 text-xs text-palette-mint">Risk Score</th>
+                          <th className="text-left py-2 text-xs text-palette-mint">Carbon Impact</th>
+                          <th className="text-left py-2 text-xs text-palette-mint">Capacity Limit</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {riskMatrix.map((entry, index) => (
+                          <tr key={index} className="border-b border-palette-mint/10 hover:bg-palette-mint/5">
+                            <td className="py-2 text-xs text-white">{entry.forwarder}</td>
+                            <td className="py-2 text-xs text-white">{entry.risk}</td>
+                            <td className="py-2 text-xs text-white">{entry.carbon}</td>
+                            <td className="py-2 text-xs text-white">{entry.capacity}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            // Strategy tab content
+            <div className="grid grid-cols-12 gap-4">
+              <div className="col-span-6">
+                <div className="bg-palette-blue/30 p-4 rounded-md border border-palette-mint/20">
+                  <h3 className="text-white/80 text-sm mb-4 flex items-center">
+                    <BriefcaseBusiness size={16} className="text-palette-mint mr-2" />
+                    Territory Optimization Strategy
+                  </h3>
+                  <div className="overflow-y-auto h-64">
+                    <table className="w-full table-auto">
+                      <thead>
+                        <tr className="border-b border-palette-mint/20">
+                          <th className="text-left py-2 text-xs text-palette-mint">Country</th>
+                          <th className="text-left py-2 text-xs text-palette-mint">Current Ruler</th>
+                          <th className="text-left py-2 text-xs text-palette-mint">Weakness</th>
+                          <th className="text-left py-2 text-xs text-palette-mint">Strategic Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {territoryData.map((entry, index) => (
+                          <tr key={index} className="border-b border-palette-mint/10 hover:bg-palette-mint/5">
+                            <td className="py-2 text-xs text-white">{entry.country}</td>
+                            <td className="py-2 text-xs text-white">{entry.ruler}</td>
+                            <td className="py-2 text-xs text-white">{entry.weakness}</td>
+                            <td className="py-2 text-xs text-white flex items-center">
+                              <ArrowUpRight size={12} className="text-palette-mint mr-1" />
+                              {entry.action}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="col-span-6">
+                <div className="bg-palette-blue/30 p-4 rounded-md border border-palette-mint/20">
+                  <h3 className="text-white/80 text-sm mb-4 flex items-center">
+                    <TrendingUp size={16} className="text-palette-mint mr-2" />
+                    Potential Cost Savings
+                  </h3>
+                  <div className="p-2">
+                    <div className="mb-6">
+                      <div className="flex justify-between mb-2">
+                        <span className="text-xs text-white/80">Current Approach (Air-Focused)</span>
+                        <span className="text-xs text-white/80">{formatCurrency(1896720)}</span>
+                      </div>
+                      <div className="w-full bg-palette-blue/40 rounded-full h-2">
+                        <div className="bg-red-400 h-2 rounded-full" style={{ width: '100%' }}></div>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-6">
+                      <div className="flex justify-between mb-2">
+                        <span className="text-xs text-white/80">Optimized Mix (70% Sea, 30% Air)</span>
+                        <span className="text-xs text-white/80">{formatCurrency(1707048)}</span>
+                      </div>
+                      <div className="w-full bg-palette-blue/40 rounded-full h-2">
+                        <div className="bg-palette-mint h-2 rounded-full" style={{ width: '90%' }}></div>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-6">
+                      <div className="flex justify-between mb-2">
+                        <span className="text-xs text-white/80">Tender Renegotiation (All Modes)</span>
+                        <span className="text-xs text-white/80">{formatCurrency(1612212)}</span>
+                      </div>
+                      <div className="w-full bg-palette-blue/40 rounded-full h-2">
+                        <div className="bg-palette-mint h-2 rounded-full" style={{ width: '85%' }}></div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-palette-mint/10 p-3 rounded-md mt-6">
+                      <div className="flex items-center">
+                        <ArrowUpCircle size={16} className="text-palette-mint mr-2" />
+                        <span className="text-xs text-white font-medium">Potential Annual Savings</span>
+                        <span className="text-lg text-palette-mint font-bold ml-auto">{formatCurrency(284508)}</span>
+                      </div>
+                      <div className="mt-2 text-xs text-white/70">
+                        Implementing proposed modal shift strategy can reduce logistics costs by up to 15%
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="col-span-6">
+                <div className="bg-palette-blue/30 p-4 rounded-md border border-palette-mint/20">
+                  <h3 className="text-white/80 text-sm mb-4 flex items-center">
+                    <Zap size={16} className="text-palette-mint mr-2" />
+                    Modal Shift Impact
+                  </h3>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={scenarioData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#15ABC0" opacity={0.2} />
+                        <XAxis dataKey="type" stroke="#15ABC0" />
+                        <YAxis stroke="#15ABC0" />
+                        <Tooltip
+                          contentStyle={{ 
+                            backgroundColor: '#071777', 
+                            borderColor: '#15ABC0',
+                            borderRadius: '4px'
+                          }}
+                          formatter={(value) => [`${formatCurrency(value)}`, 'Cost']}
+                        />
+                        <Bar dataKey="value" fill="#15ABC0">
+                          {scenarioData.map((entry, index) => (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={index === 0 ? '#ff4d4f' : '#15ABC0'} 
+                            />
+                          ))}
+                          <ChevronRight className="text-palette-mint" />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="col-span-6">
+                <div className="bg-palette-blue/30 p-4 rounded-md border border-palette-mint/20">
+                  <h3 className="text-white/80 text-sm mb-4 flex items-center">
+                    <LineChart size={16} className="text-palette-mint mr-2" />
+                    Carbon Impact by Transport Mode
+                  </h3>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={carbonImpactData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        >
+                          {carbonImpactData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          formatter={(value) => [`${value}x Footprint`, 'Carbon Impact']}
+                          contentStyle={{ 
+                            backgroundColor: '#071777', 
+                            borderColor: '#15ABC0',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Analytics;
