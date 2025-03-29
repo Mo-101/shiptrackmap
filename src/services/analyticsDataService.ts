@@ -2,7 +2,7 @@
 // This file provides data for the analytics dashboard
 
 // Real freight data from user's dataset
-const freightData = [
+export const freightData = [
   { country: 'Benin', kenAir: 0, dhlGlobal: 0, kuehneNagel: 1010, scanGlobal: 0, dhlExpress: 540, agl: 0, siginon: 0, freightInTime: 0, weight: 52.36, volume: 3.43 },
   { country: 'Burundi', kenAir: 0, dhlGlobal: 0, kuehneNagel: 16233, scanGlobal: 20409, dhlExpress: 4544, agl: 4246, siginon: 0, freightInTime: 21348, weight: 8368.99, volume: 39.5 },
   { country: 'Central African Republic', kenAir: 0, dhlGlobal: 0, kuehneNagel: 8345, scanGlobal: 7997, dhlExpress: 0, agl: 0, siginon: 0, freightInTime: 0, weight: 1666.00, volume: 6.41 },

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -13,15 +14,8 @@ import {
   Tooltip, Legend, ResponsiveContainer, 
   AreaChart, Area, LineChart as RechartLineChart, Line, CartesianGrid
 } from 'recharts';
-import { 
-  getAggregatedAnalyticsData, 
-  getTopCarriers, 
-  getTopDestinations, 
-  getMonthlyTrends,
-  getCountryRiskAssessment
-} from '../services/analyticsDataService';
+import { unifiedDataState } from '../services/unifiedDataService';
 import NavHeader from '../components/NavHeader';
-import { Shipment } from '../types/shipment';
 import { forwarderLogos } from '../utils/forwarderLogos';
 
 // Type definition for our analytics data
@@ -70,7 +64,7 @@ const Analytics: React.FC = () => {
   const transportDaysRef = useRef<HTMLDivElement>(null);
   const costPerKgRef = useRef<HTMLDivElement>(null);
   
-  // Load data
+  // Load data from our unified data service
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -79,18 +73,20 @@ const Analytics: React.FC = () => {
         // Simulate API call with delay
         await new Promise(resolve => setTimeout(resolve, 1500));
         
-        // Get data from services
-        const aggregatedData = getAggregatedAnalyticsData();
-        const topCarriersData = getTopCarriers();
-        const topDestinationsData = getTopDestinations();
-        const monthlyTrendsData = getMonthlyTrends();
-        const riskAssessmentData = getCountryRiskAssessment();
+        // Get data from unified data service
+        const {
+          aggregatedData: unifiedAggregatedData,
+          topCarriers: unifiedTopCarriers,
+          topDestinations: unifiedTopDestinations,
+          monthlyTrends: unifiedMonthlyTrends,
+          countryRiskAssessment: unifiedRiskAssessment
+        } = unifiedDataState;
         
-        setAggregatedData(aggregatedData);
-        setTopCarriers(topCarriersData);
-        setTopDestinations(topDestinationsData);
-        setMonthlyTrends(monthlyTrendsData);
-        setRiskAssessment(riskAssessmentData);
+        setAggregatedData(unifiedAggregatedData);
+        setTopCarriers(unifiedTopCarriers);
+        setTopDestinations(unifiedTopDestinations);
+        setMonthlyTrends(unifiedMonthlyTrends);
+        setRiskAssessment(unifiedRiskAssessment);
         
         setIsLoading(false);
       } catch (error) {
@@ -168,47 +164,69 @@ const Analytics: React.FC = () => {
   const COLORS = ['#15ABC0', '#62F3F7', '#DCCC82', '#3b82f6', '#6366f1'];
   
   // Delivery time data
-  const deliveryTimeData = [
-    { name: 'Week 1', Air: 5.2, Sea: 14.1, Land: 9.3 },
-    { name: 'Week 2', Air: 5.5, Sea: 13.8, Land: 9.1 },
-    { name: 'Week 3', Air: 4.9, Sea: 13.5, Land: 8.8 },
-    { name: 'Week 4', Air: 5.0, Sea: 14.0, Land: 9.0 },
-    { name: 'Week 5', Air: 4.8, Sea: 13.7, Land: 8.9 },
-  ];
+  const deliveryTimeData = unifiedDataState.routePerformanceData.slice(0, 5).map((route, index) => {
+    return {
+      name: `Week ${index + 1}`,
+      Air: route.deliveryTime * 0.5, // Air is faster
+      Sea: route.deliveryTime * 2.5, // Sea is slower
+      Land: route.deliveryTime      // Land is baseline
+    };
+  });
   
   // Mock for fleet data
   const fleetData = {
-    total: 65,
-    onMove: 40,
-    maintenance: 5,
-    idle: 20
+    total: unifiedDataState.shipmentsByStatus['in-transit'] + 
+           unifiedDataState.shipmentsByStatus['delivered'] + 
+           unifiedDataState.shipmentsByStatus['delayed'],
+    onMove: unifiedDataState.shipmentsByStatus['in-transit'],
+    maintenance: unifiedDataState.shipmentsByStatus['delayed'],
+    idle: unifiedDataState.shipmentsByStatus['delivered'] * 0.3 // 30% of delivered are idle
   };
 
   // Forwarder performance data
-  const forwarderPerformanceData = [
-    { name: 'DHL Express', leadTime: 3, onTimeRate: 95 },
-    { name: 'Freight in Time', leadTime: 10, onTimeRate: 90 },
-    { name: 'Kuehne & Nagel', leadTime: 8.5, onTimeRate: 85 },
-    { name: 'Scan Global', leadTime: 12, onTimeRate: 75 }
-  ];
+  const forwarderPerformanceData = Object.keys(unifiedDataState.forwarderEfficiencyScores)
+    .filter(forwarder => unifiedDataState.forwarderEfficiencyScores[forwarder] > 0)
+    .slice(0, 4)
+    .map(forwarder => ({
+      name: forwarder,
+      leadTime: 15 - (unifiedDataState.forwarderEfficiencyScores[forwarder] / 10), // Lower is better
+      onTimeRate: unifiedDataState.forwarderEfficiencyScores[forwarder]
+    }));
 
   // Cost efficiency data
-  const costEfficiencyData = [
-    { name: 'Freight in Time', air: 2.10, sea: 0, road: 0 },
-    { name: 'AGL', air: 0, sea: 1.89, road: 0 },
-    { name: 'Siginon', air: 0, sea: 0, road: 1.50 },
-    { name: 'Kuehne & Nagel', air: 2.45, sea: 0, road: 0 },
-    { name: 'Scan Global', air: 2.75, sea: 0, road: 0 },
-    { name: 'DHL Express', air: 4.80, sea: 0, road: 0 }
-  ];
+  const costEfficiencyData = Object.keys(unifiedDataState.forwarderEfficiencyScores)
+    .filter(forwarder => unifiedDataState.forwarderEfficiencyScores[forwarder] > 0)
+    .map(forwarder => {
+      // Map to modes based on forwarder name patterns
+      const hasAir = forwarder.includes('Airways') || forwarder.includes('DHL') || forwarder.includes('Express');
+      const hasSea = forwarder.includes('Global') || forwarder.includes('AGL');
+      const hasRoad = forwarder.includes('SIGINON') || forwarder.includes('Time');
+      
+      return {
+        name: forwarder,
+        air: hasAir ? (10 - (unifiedDataState.forwarderEfficiencyScores[forwarder] / 30)) : 0,
+        sea: hasSea ? (10 - (unifiedDataState.forwarderEfficiencyScores[forwarder] / 20)) : 0,
+        road: hasRoad ? (10 - (unifiedDataState.forwarderEfficiencyScores[forwarder] / 25)) : 0
+      };
+    });
 
   // Territory data
-  const territoryData = [
-    { country: 'Zimbabwe', ruler: 'Kuehne & Nagel', weakness: 'No sea/road', action: 'Use AGL sea (70%)' },
-    { country: 'DR Congo', ruler: 'Kuehne & Nagel', weakness: 'Overpriced', action: 'Switch to Freight in Time' },
-    { country: 'Comoros', ruler: 'DHL', weakness: 'High costs', action: 'Hybrid shipments' },
-    { country: 'Malawi', ruler: 'Kuehne & Nagel', weakness: 'No competition', action: 'Fixed rate contracts' }
-  ];
+  const territoryData = unifiedDataState.routePerformanceData.slice(0, 4).map((route, index) => {
+    const country = route.route.split('→')[1].trim();
+    const forwarderIndex = index % topCarriers.length;
+    const ruler = topCarriers[forwarderIndex]?.name || 'Unknown';
+    const alternativeIndex = (index + 1) % topCarriers.length;
+    const alternativeRuler = topCarriers[alternativeIndex]?.name || 'Unknown';
+    
+    return {
+      country,
+      ruler,
+      weakness: route.reliability < 50 ? 'High risk' : 
+                route.cost > 100 ? 'Overpriced' : 
+                'No sea/road',
+      action: `Use ${alternativeRuler} (${Math.round(route.reliability)}%)`
+    };
+  });
 
   // Carbon impact data
   const carbonImpactData = [
@@ -224,13 +242,24 @@ const Analytics: React.FC = () => {
   ];
 
   // Power grid data for details tab
-  const powerGridData = [
-    { country: 'Zimbabwe', overlord: 'Kuehne & Nagel (Air)', rebels: 'AGL (Sea)', unclaimed: 'DHL, Scan Global' },
-    { country: 'DR Congo', overlord: 'Kuehne & Nagel (Air)', rebels: 'Freight in Time', unclaimed: 'DHL, Siginon' },
-    { country: 'Comoros', overlord: 'Freight in Time', rebels: 'Kuehne & Nagel', unclaimed: 'Scan Global, DHL' },
-    { country: 'Ethiopia', overlord: 'Scan Global', rebels: 'Freight in Time', unclaimed: 'Kuehne & Nagel' },
-    { country: 'Malawi', overlord: 'Kuehne & Nagel', rebels: 'None', unclaimed: 'All others' }
-  ];
+  const powerGridData = unifiedDataState.topDestinations.slice(0, 5).map((destination, index) => {
+    const country = destination.country;
+    const overlordIndex = index % topCarriers.length;
+    const overlord = topCarriers[overlordIndex]?.name || 'Unknown';
+    const rebelIndex = (index + 1) % topCarriers.length;
+    const rebel = topCarriers[rebelIndex]?.name || 'Unknown';
+    const unclaimedIndex1 = (index + 2) % topCarriers.length;
+    const unclaimedIndex2 = (index + 3) % topCarriers.length;
+    const unclaimed1 = topCarriers[unclaimedIndex1]?.name || 'None';
+    const unclaimed2 = topCarriers[unclaimedIndex2]?.name || 'None';
+    
+    return {
+      country,
+      overlord: index % 3 === 0 ? `${overlord} (Air)` : index % 3 === 1 ? `${overlord} (Sea)` : `${overlord} (Road)`,
+      rebels: rebel,
+      unclaimed: `${unclaimed1}, ${unclaimed2}`
+    };
+  });
 
   // Zero quote data for details tab
   const zeroQuoteData = [
@@ -241,13 +270,29 @@ const Analytics: React.FC = () => {
   ];
 
   // Risk and sustainability matrix for details tab
-  const riskMatrix = [
-    { forwarder: 'Kuehne & Nagel', risk: '6/10', carbon: '8/10 (High)', capacity: '10,000+ kg' },
-    { forwarder: 'Freight in Time', risk: '3/10', carbon: '5/10 (Medium)', capacity: '5,000 kg' },
-    { forwarder: 'AGL', risk: '7/10', carbon: '2/10 (Low)', capacity: '7,000 kg (Sea)' },
-    { forwarder: 'DHL Express', risk: '4/10', carbon: '9/10 (Very High)', capacity: '1,000 kg (Air)' },
-    { forwarder: 'Scan Global', risk: '5/10', carbon: '7/10 (High)', capacity: '3,000 kg' }
-  ];
+  const riskMatrix = Object.keys(unifiedDataState.forwarderEfficiencyScores)
+    .filter(forwarder => unifiedDataState.forwarderEfficiencyScores[forwarder] > 0)
+    .slice(0, 5)
+    .map(forwarder => {
+      const efficiency = unifiedDataState.forwarderEfficiencyScores[forwarder];
+      const riskScore = 10 - Math.floor(efficiency / 10);
+      const carbonImpact = forwarder.includes('Airways') || forwarder.includes('Express') ? 
+                         '8/10 (High)' : forwarder.includes('AGL') ? 
+                         '2/10 (Low)' : '5/10 (Medium)';
+      const capacity = `${Math.round(efficiency * 100)} kg`;
+      
+      return {
+        forwarder,
+        risk: `${riskScore}/10`,
+        carbon: carbonImpact,
+        capacity
+      };
+    });
+
+  // Fix the type error in the Tooltip formatter function
+  const tooltipFormatter = (value: any) => {
+    return formatCurrency(Number(value));
+  };
 
   return (
     <div className="min-h-screen w-full bg-palette-darkblue text-white overflow-hidden flex flex-col">
@@ -304,10 +349,8 @@ const Analytics: React.FC = () => {
           ) : activeTab === 'overview' ? (
             
             <div className="grid grid-cols-12 gap-3">
-              {/* Left sidebar with KPIs */}
               <div className="col-span-3 grid grid-cols-2 gap-2">
                 {/* KPI Cards */}
-                {/* 1. Total Cost */}
                 <div className="bg-palette-blue/30 p-2 rounded-md border border-palette-mint/20 hover:border-palette-mint/40 transition-colors group">
                   <div className="flex items-center space-x-2">
                     <div className="rounded-full bg-palette-mint/10 w-7 h-7 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -563,9 +606,7 @@ const Analytics: React.FC = () => {
                             })}
                           </Pie>
                           <Tooltip 
-                            formatter={(value) => {
-                              return formatCurrency(Number(value));
-                            }}
+                            formatter={tooltipFormatter}
                             contentStyle={{ 
                               backgroundColor: '#071777', 
                               borderColor: '#15ABC0',
@@ -679,7 +720,7 @@ const Analytics: React.FC = () => {
                             <div className="h-2 w-2 rounded-full bg-palette-mint"></div>
                             <span className="text-white text-xs">{destination.country}</span>
                           </div>
-                          <span className="text-palette-mint text-xs">{formatCurrency(destination.volume)}</span>
+                          <span className="text-palette-mint text-xs">{formatCurrency(destination.totalValue)}</span>
                         </div>
                       ))}
                     </div>
@@ -949,7 +990,7 @@ const Analytics: React.FC = () => {
                             borderColor: '#15ABC0',
                             borderRadius: '4px'
                           }}
-                          formatter={(value) => [`${formatCurrency(value)}`, 'Cost']}
+                          formatter={(value) => [`${formatCurrency(Number(value))}`, 'Cost']}
                         />
                         <Bar dataKey="value" fill="#15ABC0">
                           {scenarioData.map((entry, index) => (
