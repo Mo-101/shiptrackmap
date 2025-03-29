@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -564,7 +563,9 @@ const Analytics: React.FC = () => {
                             })}
                           </Pie>
                           <Tooltip 
-                            formatter={(value) => formatCurrency(Number(value))}
+                            formatter={(value) => {
+                              return formatCurrency(Number(value));
+                            }}
                             contentStyle={{ 
                               backgroundColor: '#071777', 
                               borderColor: '#15ABC0',

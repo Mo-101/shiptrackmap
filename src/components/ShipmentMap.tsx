@@ -11,6 +11,10 @@ import MapOverlay from './MapOverlay';
 import MapContainer from './MapContainer';
 import { generateMapRoutes } from '../utils/mapRouteGenerator';
 import { CustomLayerProps } from '../utils/mapAnimations';
+import { 
+  Activity, ChevronRight, Zap, Layers, FileWarning, 
+  CircleArrowUp as ArrowUpCircle, Database, LineChart, BriefcaseBusiness, HardDriveDownload 
+} from 'lucide-react';
 
 // Update to use the provided token
 mapboxgl.accessToken = 'pk.eyJ1IjoiYWthbmltbzEiLCJhIjoiY2w5ODU2cjR2MDR3dTNxcXRpdG5jb3Z6dyJ9.vi2wspa-B9a9gYYWMpEm0A';
