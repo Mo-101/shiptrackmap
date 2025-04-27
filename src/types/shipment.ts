@@ -21,24 +21,38 @@ export interface Shipment {
   weight: string;
   volume?: string;
   value?: string;
-  stockRelease?: string;
-  whoDescription?: string;
-  expirationDate?: string;
-  serialNumber?: string;
-  warehouse?: string;
-  // Additional fields for DeepCAL
-  dateOfGreenlightToPickup?: string;
-  dateOfCollection?: string;
-  dateOfArrivalDestination?: string;
-  freightAgent?: string;
-  freightAgentCost?: number;
-  initialQuoteAwarded?: number;
-  finalQuoteAwarded?: number;
+  
+  // DeepCAL fields from the documentation
+  stockRelease?: string;                // Request reference (Shipment Number/ID)
+  whoDescription?: string;              // WHO specific description
+  expirationDate?: string;              // Expiration date if applicable
+  serialNumber?: string;                // Serial number for tracking
+  warehouse?: string;                   // Origin warehouse
+  dateOfGreenlightToPickup?: string;    // Date when FF was given greenlight to pick up
+  dateOfCollection?: string;            // Date when FF picked up cargo
+  dateOfArrivalDestination?: string;    // Date when cargo arrived at destination
+  
+  // Freight agent information
+  freightAgent?: string;                // Name of freight forwarder
+  freightAgentCost?: number;            // Cost of freight agent
+  initialQuoteAwarded?: number;         // Initial quote from freight forwarder
+  finalQuoteAwarded?: number;           // Final quote from freight forwarder that was awarded
+  
+  // Delivery information
   deliveryStatus?: 'on-time' | 'delayed' | 'canceled';
-  modeOfShipment?: string;
-  reliabilityScore?: number;
-  riskScore?: number;
-  responsivenessFactor?: number;
+  modeOfShipment?: string;              // Air, Road, Sea
+  
+  // Performance metrics
+  reliabilityScore?: number;            // Reliability score for the shipment
+  riskScore?: number;                   // Risk assessment score
+  responsivenessFactor?: number;        // Responsiveness of the freight forwarder
+  
+  // Carrier information
+  carrier?: string;                     // Carrier used by the freight forwarder
+  carrierCost?: number;                 // Cost charged by the carrier
+  
+  // Additional fields
+  comments?: string;                    // Comments on overall shipment
 }
 
 // DeepCAL related types

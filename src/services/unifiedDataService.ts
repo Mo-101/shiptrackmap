@@ -61,7 +61,7 @@ export const convertFreightToShipments = (): Shipment[] => {
     ];
     
     const dominantForwarder = forwarders
-      .filter(f => f.value > 0)
+      .filter(f => typeof f.value === 'number' && f.value > 0)
       .sort((a, b) => b.value - a.value)[0]?.name || 'Unknown';
     
     // Randomly generate coordinates based on country name (in a real app, these would come from geocoding API)
@@ -109,7 +109,16 @@ export const convertFreightToShipments = (): Shipment[] => {
       freightAgentCost: Math.round(forwarders.reduce((sum, f) => sum + (typeof f.value === 'number' ? f.value : 0), 0)),
       modeOfShipment: index % 3 === 0 ? 'Air' : index % 3 === 1 ? 'Sea' : 'Road',
       reliabilityScore: Math.round(70 + Math.random() * 30),
-      riskScore: Math.round(Math.random() * 10)
+      riskScore: Math.round(Math.random() * 10),
+      // Add DeepCAL specific fields
+      dateOfGreenlightToPickup: new Date(Date.now() - (Math.random() * 30 * 24 * 60 * 60 * 1000)).toISOString(),
+      dateOfCollection: new Date(Date.now() - (Math.random() * 20 * 24 * 60 * 60 * 1000)).toISOString(),
+      dateOfArrivalDestination: new Date(Date.now() + (Math.random() * 10 * 24 * 60 * 60 * 1000)).toISOString(),
+      stockRelease: `SR-2024-${10000 + index}`,
+      initialQuoteAwarded: Math.round(1000 + Math.random() * 5000),
+      finalQuoteAwarded: Math.round(800 + Math.random() * 4000),
+      deliveryStatus: randomStatus === 'delivered' ? 'on-time' : randomStatus === 'delayed' ? 'delayed' : 'on-time',
+      responsivenessFactor: Math.round(50 + Math.random() * 50)
     };
   });
 };
@@ -135,7 +144,7 @@ export const calculateForwarderEfficiency = (): Record<string, number> => {
     
     freightData.forEach(row => {
       const key = forwarderToKey(forwarder);
-      if (key && row[key] > 0) {
+      if (key && typeof row[key] === 'number' && row[key] > 0) {
         totalValue += row[key] as number;
         totalWeight += row.weight;
       }
@@ -295,4 +304,3 @@ const forwarderToKey = (name: string): keyof typeof freightData[0] | null => {
 
 // Export a single global instance that can be used throughout the app
 export const unifiedDataState = getUnifiedDataState();
-
