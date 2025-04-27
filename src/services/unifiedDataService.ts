@@ -106,7 +106,7 @@ export const convertFreightToShipments = (): Shipment[] => {
       weight: `${Math.round(freight.weight)} kg`,
       volume: `${freight.volume.toFixed(2)} m³`,
       freightAgent: dominantForwarder,
-      freightAgentCost: Math.round(forwarders.reduce((sum, f) => sum + f.value, 0)),
+      freightAgentCost: Math.round(forwarders.reduce((sum, f) => sum + (typeof f.value === 'number' ? f.value : 0), 0)),
       modeOfShipment: index % 3 === 0 ? 'Air' : index % 3 === 1 ? 'Sea' : 'Road',
       reliabilityScore: Math.round(70 + Math.random() * 30),
       riskScore: Math.round(Math.random() * 10)
@@ -136,7 +136,7 @@ export const calculateForwarderEfficiency = (): Record<string, number> => {
     freightData.forEach(row => {
       const key = forwarderToKey(forwarder);
       if (key && row[key] > 0) {
-        totalValue += row[key];
+        totalValue += row[key] as number;
         totalWeight += row.weight;
       }
     });
@@ -295,3 +295,4 @@ const forwarderToKey = (name: string): keyof typeof freightData[0] | null => {
 
 // Export a single global instance that can be used throughout the app
 export const unifiedDataState = getUnifiedDataState();
+
