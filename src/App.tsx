@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Analytics from "./pages/Analytics";
+import DeepCAL from "./pages/DeepCAL";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +20,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/shipment/:id" element={<Index />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/deepcal" element={<DeepCAL />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
