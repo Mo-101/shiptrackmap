@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { Shipment } from '../types/shipment';
@@ -10,53 +11,74 @@ import MapOverlay from './MapOverlay';
 import MapContainer from './MapContainer';
 import { generateMapRoutes } from '../utils/mapRouteGenerator';
 import { CustomLayerProps } from '../utils/mapAnimations';
-import { Activity, ChevronRight, Zap, Layers, FileWarning, CircleArrowUp as ArrowUpCircle, Database, LineChart, BriefcaseBusiness, HardDriveDownload } from 'lucide-react';
+import { 
+  Activity, ChevronRight, Zap, Layers, FileWarning, 
+  CircleArrowUp as ArrowUpCircle, Database, LineChart, BriefcaseBusiness, HardDriveDownload 
+} from 'lucide-react';
 
 // Update to use the provided token
 mapboxgl.accessToken = 'pk.eyJ1IjoiYWthbmltbzEiLCJhIjoiY2w5ODU2cjR2MDR3dTNxcXRpdG5jb3Z6dyJ9.vi2wspa-B9a9gYYWMpEm0A';
+
 interface ShipmentMapProps {
   shipments: Shipment[];
   activeShipment?: Shipment;
 }
-const ShipmentMap: React.FC<ShipmentMapProps> = ({
-  shipments,
-  activeShipment
-}) => {
+
+const ShipmentMap: React.FC<ShipmentMapProps> = ({ shipments, activeShipment }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<[number, number] | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [hoveredShipment, setHoveredShipment] = useState<Shipment | null>(null);
   const [showDeepCALOverlay, setShowDeepCALOverlay] = useState(false);
-
+  
   // Track animation frames for cleanup
   const animationFrameRef = useRef<number | null>(null);
   // Custom properties for different route types
   const routeProps = useRef<Record<string, CustomLayerProps>>({});
+
   useEffect(() => {
     if (!mapLoaded || !map.current?.isStyleLoaded()) return;
+
     generateMapRoutes(map.current, shipments, activeShipment);
   }, [shipments, activeShipment, mapLoaded]);
+
   const toggleDeepCALOverlay = () => {
     setShowDeepCALOverlay(prev => !prev);
   };
-  return <div className="relative w-full h-full bg-palette-darkblue">
+
+  return (
+    <div className="relative w-full h-full bg-palette-darkblue">
       <div ref={mapContainer} className="absolute inset-0" />
       
       {/* Initialize the map */}
-      <MapContainer shipments={shipments} selectedShipment={activeShipment} mapContainer={mapContainer} map={map} routeProps={routeProps} animationFrameRef={animationFrameRef} setMapLoaded={setMapLoaded} setSelectedLocation={setSelectedLocation} setHoveredShipment={setHoveredShipment} />
+      <MapContainer
+        shipments={shipments}
+        selectedShipment={activeShipment}
+        mapContainer={mapContainer}
+        map={map}
+        routeProps={routeProps}
+        animationFrameRef={animationFrameRef}
+        setMapLoaded={setMapLoaded}
+        setSelectedLocation={setSelectedLocation}
+        setHoveredShipment={setHoveredShipment}
+      />
       
       {/* Sci-fi overlay elements */}
       <MapOverlay />
       
       {/* DeepCAL Workflow Toggle */}
-      <button onClick={toggleDeepCALOverlay} className="absolute top-4 right-4 z-10 bg-palette-mint/20 hover:bg-palette-mint/40 rounded-md flex items-center space-x-1 transition-colors px-[21px] py-[8px] my-[63px] text-lg text-center font-bold text-amber-500">
+      <button 
+        onClick={toggleDeepCALOverlay}
+        className="absolute top-4 right-4 z-10 bg-palette-mint/20 hover:bg-palette-mint/40 text-palette-mint py-1 px-3 rounded-md flex items-center space-x-1 text-xs transition-colors"
+      >
         <span className="h-2 w-2 bg-palette-mint rounded-full animate-pulse"></span>
         <span>DeepCAL {showDeepCALOverlay ? 'Active' : 'Inactive'}</span>
       </button>
       
       {/* DeepCAL Workflow Overlay */}
-      {showDeepCALOverlay && <div className="absolute inset-0 bg-palette-darkblue/80 z-20 flex items-center justify-center">
+      {showDeepCALOverlay && (
+        <div className="absolute inset-0 bg-palette-darkblue/80 z-20 flex items-center justify-center">
           <div className="w-5/6 h-5/6 bg-palette-blue/30 border border-palette-mint/30 rounded-lg p-4 overflow-auto">
             <h2 className="text-xl font-bold text-palette-mint mb-4">DeepCAL Algorithm Workflow</h2>
             
@@ -260,20 +282,37 @@ const ShipmentMap: React.FC<ShipmentMapProps> = ({
               </div>
             </div>
             
-            <button onClick={toggleDeepCALOverlay} className="mt-4 bg-palette-mint/20 hover:bg-palette-mint/40 text-palette-mint py-2 px-4 rounded-md transition-colors">
+            <button 
+              onClick={toggleDeepCALOverlay} 
+              className="mt-4 bg-palette-mint/20 hover:bg-palette-mint/40 text-palette-mint py-2 px-4 rounded-md transition-colors"
+            >
               Close Workflow View
             </button>
           </div>
-        </div>}
+        </div>
+      )}
       
       {/* HUD Components */}
-      <MapHUD shipments={shipments} activeShipments={shipments.filter(s => s.status === 'in-transit').length} delayedShipments={shipments.filter(s => s.status === 'delayed').length} />
+      <MapHUD 
+        shipments={shipments}
+        activeShipments={shipments.filter(s => s.status === 'in-transit').length}
+        delayedShipments={shipments.filter(s => s.status === 'delayed').length}
+      />
       
       {/* Shipment info tooltip */}
-      {hoveredShipment && <ShipmentTooltip shipment={hoveredShipment} />}
+      {hoveredShipment && (
+        <ShipmentTooltip shipment={hoveredShipment} />
+      )}
       
       {/* Weather info */}
-      {selectedLocation && <WeatherInfo location={selectedLocation} onClose={() => setSelectedLocation(null)} />}
-    </div>;
+      {selectedLocation && (
+        <WeatherInfo
+          location={selectedLocation}
+          onClose={() => setSelectedLocation(null)}
+        />
+      )}
+    </div>
+  );
 };
+
 export default ShipmentMap;

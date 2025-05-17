@@ -5,7 +5,7 @@ import ShipmentMap from '../components/ShipmentMap';
 import ShipmentList from '../components/ShipmentList';
 import ShipmentDetail from './ShipmentDetail';
 import { Shipment } from '../types/shipment';
-import { BarChart2, FileChart } from 'lucide-react';
+import { BarChart2 } from 'lucide-react';
 import { convertFreightToShipments } from '../services/unifiedDataService';
 
 const Index = () => {
@@ -36,21 +36,14 @@ const Index = () => {
         path="/"
         element={
           <div className="h-screen w-screen flex flex-col bg-palette-darkblue">
-            {/* Navigation Links */}
-            <div className="absolute top-4 right-4 z-10 flex gap-3">
+            {/* Analytics Link */}
+            <div className="absolute top-4 right-4 z-10">
               <Link 
                 to="/analytics" 
                 className="flex items-center gap-2 bg-secondary/80 hover:bg-secondary text-white py-2 px-4 rounded-full text-sm font-medium transition-colors shadow-lg"
               >
                 <BarChart2 size={16} />
                 <span>Analytics</span>
-              </Link>
-              <Link 
-                to="/deepcal" 
-                className="flex items-center gap-2 bg-palette-mint/80 hover:bg-palette-mint text-palette-darkblue py-2 px-4 rounded-full text-sm font-medium transition-colors shadow-lg"
-              >
-                <FileChart size={16} />
-                <span>DeepCAL</span>
               </Link>
             </div>
             
