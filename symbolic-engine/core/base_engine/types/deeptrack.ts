@@ -92,7 +92,7 @@ export type AppSection = 'map' | 'analytics' | 'deepcal' | 'about' | 'settings';
 export interface TabItem {
   id: AppSection;
   label: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<unknown>;
 }
 
 export interface MapPoint {

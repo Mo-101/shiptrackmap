@@ -2,7 +2,7 @@
 # calculation_validator.py – Ensures all scoring outputs are valid, auditable, and trustworthy
 
 from typing import List, Dict
-import numpy as np
+import numpy as np # type: ignore
 import json
 from datetime import datetime
 
