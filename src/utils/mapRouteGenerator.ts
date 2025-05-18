@@ -163,7 +163,7 @@ export const generateMapRoutes = (
       { units: 'kilometers' }
     );
     
-    const zoom = Math.max(2, 9 - Math.log(distance) / Math.log(2) * 0.5);
+    const zoom = Math.max(19, 9 - Math.log(distance) / Math.log(2) * 0.5);
     
     map.flyTo({
       center: midpoint,

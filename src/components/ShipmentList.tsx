@@ -23,26 +23,59 @@ const ShipmentList: React.FC<ShipmentListProps> = ({
     setExpandedId(expandedId === id ? null : id);
   };
   
-  const filteredShipments = shipments.filter(shipment => 
-    shipment.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    shipment.origin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    shipment.destination.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    shipment.itemCategory.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter for delivered shipments only, sort by delivery date descending, then filter by search
+  // Helper to check for delivered status in both base data and normalized types
+  const isDelivered = (shipment: any) => {
+    const statusRaw = shipment.deliveryStatus || shipment.delivery_status || shipment.status;
+    return (
+      statusRaw?.toLowerCase() === 'delivered' ||
+      statusRaw?.toLowerCase() === 'on-time' // support normalized type
+    );
+  };
+  // Helper to get delivery date in a robust way
+  const getDeliveryDate = (shipment: any) => {
+    return (
+      shipment.dateOfArrivalDestination ||
+      shipment.date_of_arrival_destination ||
+      shipment.dateOfArrival ||
+      shipment.date_of_arrival ||
+      shipment.eta ||
+      shipment.date_of_collection ||
+      ''
+    );
+  };
 
-  // Get the appropriate icon based on shipment type
-  const getShipmentIcon = (type: string) => {
-    switch(type) {
-      case 'ship':
+  const deliveredShipments = shipments
+    .filter(isDelivered)
+    .sort((a, b) => {
+      const dateA = new Date(getDeliveryDate(a));
+      const dateB = new Date(getDeliveryDate(b));
+      return dateB.getTime() - dateA.getTime();
+    });
+  
+  const filteredShipments = deliveredShipments
+    .filter(shipment =>
+      (shipment.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (shipment.origin?.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (shipment.destination?.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (shipment.itemCategory?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+    )
+    .slice(0, 10); // Only the latest 10
+
+  // Map mode_of_shipment to icon type
+  const getShipmentIcon = (mode_of_shipment: string) => {
+    switch((mode_of_shipment || '').toLowerCase()) {
+      case 'sea':
         return <Ship className="text-palette-teal" size={18} />;
-      case 'charter':
+      case 'air':
         return <Plane className="text-palette-mint" size={18} />;
-      case 'truck':
+      case 'road':
         return <Truck className="text-palette-sand" size={18} />;
       default:
         return <Package className="text-palette-sage" size={18} />;
     }
   };
+  // Use getShipmentIcon(shipment.mode_of_shipment) everywhere in the component.
 
   return (
     <div className="relative bg-palette-blue/90 backdrop-blur-md w-80 h-full overflow-hidden flex flex-col shadow-lg border-r border-palette-teal/10">
@@ -71,7 +104,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({
       <div className="flex-1 overflow-y-auto scrollbar-hide p-4 space-y-4">
         {filteredShipments.length === 0 ? (
           <div className="text-center py-8 text-white/60">
-            No shipments match your search
+            No delivered shipments found.
           </div>
         ) : (
           filteredShipments.map((shipment) => (

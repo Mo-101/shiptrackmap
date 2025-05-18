@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepCAL Oracle - AI Logistics Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/typewriter-effect@latest/dist/core.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6d28d9;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #0f172a;
+            color: var(--light);
+        }
+        
+        .tech-font {
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+        
+        .chat-bubble {
+            border-radius: 1.5rem;
+            position: relative;
+            max-width: 80%;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .user-bubble {
+            background-color: var(--primary);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 0.5rem;
+        }
+        
+        .bot-bubble {
+            background-color: #334155;
+            margin-right: auto;
+            border-bottom-left-radius: 0.5rem;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(109, 40, 217, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(109, 40, 217, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(109, 40, 217, 0);
+            }
+        }
+        
+        .glow {
+            text-shadow: 0 0 5px rgba(16, 185, 129, 0.8);
+        }
+        
+        .voice-wave {
+            display: flex;
+            justify-content: space-between;
+            width: 40px;
+            height: 30px;
+            align-items: flex-end;
+        }
+        
+        .voice-wave span {
+            width: 5px;
+            height: 5px;
+            background-color: var(--secondary);
+            border-radius: 5px;
+            animation: voice-wave 1.5s ease-in-out infinite;
+        }
+        
+        .voice-wave span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .voice-wave span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        .voice-wave span:nth-child(4) {
+            animation-delay: 0.6s;
+        }
+        
+        .voice-wave span:nth-child(5) {
+            animation-delay: 0.8s;
+        }
+        
+        @keyframes voice-wave {
+            0% {
+                height: 5px;
+            }
+            50% {
+                height: 20px;
+            }
+            100% {
+                height: 5px;
+            }
+        }
+        
+        .route-visualization {
+            height: 200px;
+            background: linear-gradient(90deg, #334155 0%, #475569 100%);
+            border-radius: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .route-line {
+            position: absolute;
+            height: 3px;
+            background: var(--secondary);
+            top: 50%;
+            left: 10%;
+            right: 10%;
+            transform: translateY(-50%);
+        }
+        
+        .route-stop {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 3px solid var(--secondary);
+        }
+        
+        .route-label {
+            position: absolute;
+            top: 60%;
+            transform: translateY(-50%);
+            font-size: 0.75rem;
+            color: white;
+            background: var(--dark);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            white-space: nowrap;
+        }
+        
+        .training-progress {
+            height: 8px;
+            background-color: #334155;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #6d28d9, #10b981);
+            transition: width 0.3s ease;
+        }
+        
+        .confidence-meter {
+            height: 6px;
+            background-color: #334155;
+            border-radius: 3px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+        
+        .confidence-level {
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981);
+        }
+    </style>
+</head>
+<body class="min-h-screen gradient-bg">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <header class="flex items-center justify-between mb-8">
+            <div class="flex items-center">
+                <div class="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center mr-4 pulse">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl tech-font text-white">DeepCAL Oracle</h1>
+                    <p class="text-sm text-gray-400">AI Logistics Decision Engine v2.1</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="settings-btn" class="p-2 rounded-full bg-slate-800 text-emerald-400 hover:bg-slate-700 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c-.94 1.543.826 3.31 2.37 2.37a1.724 1.724 0 002.572 1.065c.426 1.756 2.924 1.756 3.35 0a1.724 1.724 0 002.573-1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </button>
+                <button id="training-btn" class="p-2 rounded-full bg-slate-800 text-amber-400 hover:bg-slate-700 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <!-- Settings Panel (Hidden by default) -->
+            <div id="settings-panel" class="hidden bg-slate-800 rounded-xl p-6 mb-6 shadow-lg">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-white">System Configuration</h2>
+                    <button id="close-settings" class="text-gray-400 hover:text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-gray-300 mb-2">Reasoning Model</label>
+                        <select class="w-full bg-slate-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600">
+                            <option>DeepCAL v2.1 (Default)</option>
+                            <option>DeepCAL v2.0 (Legacy)</option>
+                            <option>Experimental v3.0</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-300 mb-2">Speech Recognition</label>
+                        <select class="w-full bg-slate-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600">
+                            <option>Enhanced Accuracy (Recommended)</option>
+                            <option>Fast Response</option>
+                            <option>Custom Vocabulary</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-300 mb-2">Response Style</label>
+                        <select class="w-full bg-slate-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600">
+                            <option>Technical (Default)</option>
+                            <option>Concise</option>
+                            <option>Detailed Explanations</option>
+                        </select>
+                    </div>
+                    
+                    <div class="pt-4 border-t border-slate-700">
+                        <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition">
+                            Save Configuration
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Training Panel (Hidden by default) -->
+            <div id="training-panel" class="hidden bg-slate-800 rounded-xl p-6 mb-6 shadow-lg">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-white">Model Training</h2>
+                    <button id="close-training" class="text-gray-400 hover:text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-lg font-medium text-emerald-400 mb-2">Training Pipeline</h3>
+                        <p class="text-gray-300 mb-4">Upload your logistics data to improve DeepCAL's accuracy for your specific operations.</p>
+                        
+                        <div class="border-2 border-dashed border-slate-600 rounded-lg p-6 text-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            <p class="text-gray-400 mb-2">Drag & drop your training files here</p>
+                            <p class="text-sm text-gray-500">CSV, JSON, or Excel files with logistics data</p>
+                            <input type="file" id="training-files" class="hidden" multiple>
+                            <button id="browse-files" class="mt-4 bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg transition">
+                                Browse Files
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-lg font-medium text-purple-400 mb-2">Training Progress</h3>
+                        <div class="training-progress mb-2">
+                            <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-400">
+                            <span>Initializing...</span>
+                            <span id="progress-percent">0%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-4 border-t border-slate-700">
+                        <button id="start-training" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            Start Training Session
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Chat Interface -->
+            <div class="bg-slate-800 rounded-xl p-6 mb-6 shadow-lg">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-semibold text-white">Logistics Oracle</h2>
+                </div>
+                <p class="text-gray-300 mb-6">Ask me anything about your supply chain, inventory, or transportation logistics. I'll analyze patterns and predict optimal solutions.</p>
+                
+                <div class="bg-slate-900 rounded-lg p-4 mb-6">
+                    <div id="chat-container" class="h-96 overflow-y-auto mb-4 space-y-3">
+                        <div class="chat-bubble bot-bubble">
+                            <p class="text-white">Welcome to DeepCAL Oracle v2.1. I'm your AI logistics assistant with enhanced reasoning capabilities. How can I help optimize your operations today?</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <input 
+                            type="text" 
+                            id="user-input" 
+                            placeholder="Ask about routes, inventory, or costs..." 
+                            class="flex-1 bg-slate-700 text-white rounded-l-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                        >
+                        <button 
+                            id="send-btn" 
+                            class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-r-lg transition flex items-center justify-center"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center space-x-4">
+                    <button id="voice-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>
+                        Voice Input
+                    </button>
+                    <button class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg transition flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Export Data
+                    </button>
+                </div>
+            </div>
+            
+            <div id="results-section" class="hidden bg-slate-800 rounded-xl p-6 shadow-lg">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center mr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-semibold text-white">Analysis Results</h2>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-xs text-gray-400 mr-2">Confidence:</span>
+                        <div class="confidence-meter w-20">
+                            <div id="confidence-level" class="confidence-level" style="width: 85%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="results-content" class="space-y-6">
+                    <!-- Dynamic content will be inserted here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatContainer = document.getElementById('chat-container');
+            const userInput = document.getElementById('user-input');
+            const sendBtn = document.getElementById('send-btn');
+            const resultsSection = document.getElementById('results-section');
+            const resultsContent = document.getElementById('results-content');
+            const voiceBtn = document.getElementById('voice-btn');
+            const settingsBtn = document.getElementById('settings-btn');
+            const trainingBtn = document.getElementById('training-btn');
+            const settingsPanel = document.getElementById('settings-panel');
+            const trainingPanel = document.getElementById('training-panel');
+            const closeSettings = document.getElementById('close-settings');
+            const closeTraining = document.getElementById('close-training');
+            const browseFiles = document.getElementById('browse-files');
+            const trainingFiles = document.getElementById('training-files');
+            const startTraining = document.getElementById('start-training');
+            const progressBar = document.getElementById('progress-bar');
+            const progressPercent = document.getElementById('progress-percent');
+            const confidenceLevel = document.getElementById('confidence-level');
+            
+            // Enhanced sample data with more realistic logistics scenarios
+            const sampleData = {
+                optimalRoute: {
+                    origin: "Warehouse A (Chicago)",
+                    destination: "Retail Center B (Miami)",
+                    stops: [
+                        { name: "Chicago", position: 5 },
+                        { name: "Louisville", position: 25 },
+                        { name: "Atlanta", position: 60 },
+                        { name: "Miami", position: 95 }
+                    ],
+                    distance: "1,200 miles",
+                    estimatedTime: "18 hours",
+                    cost: "$2,450",
+                    savings: "$520 compared to current route",
+                    co2Reduction: "15% lower emissions",
+                    trafficPatterns: [
+                        "Avoid I-65 Nashville construction (saves 1.5 hrs)",
+                        "Optimal refueling at Louisville (lowest diesel prices)"
+                    ],
+                    confidence: 92
+                },
+                inventoryRecommendation: {
+                    currentStock: "1,250 units (45 days supply)",
+                    recommendedAdjustment: "Increase stock by 300 units (+24%)",
+                    reason: "Anticipated 22% demand surge based on:\n- Weather patterns (unseasonably cold)\n- Local events (sports championship)\n- Historical sales data (3-year trend)",
+                    confidence: 88,
+                    alternativeOptions: [
+                        "Partial increase of 150 units (medium confidence)",
+                        "Just-in-time delivery arrangement (requires vendor coordination)"
+                    ]
+                },
+                riskAssessment: {
+                    alert: "Moderate risk (Score: 6.2/10)",
+                    factors: [
+                        "Road construction on Highway 54 (30% delay probability)",
+                        "Potential labor strike at Port C (15% probability)",
+                        "Weather: 40% chance of thunderstorms in transit zone",
+                        "Regulatory: New emissions checks in Georgia (5% inspection rate)"
+                    ],
+                    mitigation: [
+                        "Alternative route via Highway 62 adds 45 minutes but avoids construction",
+                        "Pre-ship 20% inventory to Hub X as buffer (cost: $380)",
+                        "Monitor weather and adjust departure time",
+                        "Diversify carriers to mitigate strike impact"
+                    ],
+                    confidence: 85,
+                    riskTimeline: {
+                        construction: "Next 2 weeks",
+                        weather: "48-hour window",
+                        strike: "Potential 7-day notice"
+                    }
+                },
+                costAnalysis: {
+                    currentCost: "$12,450/month",
+                    optimizedCost: "$10,920/month",
+                    savings: "$1,530 (12.3%)",
+                    breakdown: [
+                        { category: "Transportation", current: "$6,200", optimized: "$5,400" },
+                        { category: "Storage", current: "$3,100", optimized: "$2,800" },
+                        { category: "Labor", current: "$2,150", optimized: "$1,920" },
+                        { category: "Misc", current: "$1,000", optimized: "$800" }
+                    ],
+                    confidence: 90
+                }
+            };
+            
+            // Enhanced knowledge base with more logistics terminology
+            const knowledgeBase = {
+                routes: ["optimal route", "delivery path", "transportation corridor", "shipping lane", "logistics network"],
+                inventory: ["stock levels", "inventory management", "supply levels", "warehouse stock", "safety stock"],
+                costs: ["transportation costs", "shipping expenses", "logistics budget", "operational costs", "carrier fees"],
+                risks: ["supply chain risk", "delivery delays", "inventory shortage", "carrier issues", "customs hold"],
+                vehicles: ["truck capacity", "trailer types", "fleet management", "vehicle utilization", "load optimization"],
+                regulations: ["transport laws", "weight limits", "emissions standards", "driver hours", "hazardous materials"]
+            };
+            
+            // Enhanced witty comments with logistics-specific humor
+            const wittyComments = [
+                "My circuits are tingling with optimization potential!",
+                "Calculating... and by calculating I mean saving you money.",
+                "I've run 8.7 million simulations and this route is the winner.",
+                "The numbers don't lie, but truckers might about their ETAs.",
+                "This recommendation is so efficient it should be illegal (but it's not).",
+                "Let me crunch these numbers like a overloaded pallet.",
+                "Analyzing routes with the precision of a GPS satellite.",
+                "Optimizing your logistics like I'm playing Tetris with your freight."
+            ];
+            
+            // Enhanced greetings
+            const greetings = [
+                "Hello, logistics master! Ready to optimize?",
+                "Greetings, supply chain strategist! What's the challenge?",
+                "Welcome back, efficiency seeker! What needs improving?",
+                "Ah, another mind ready to be optimized!",
+                "Let's make some data-driven magic happen!",
+                "DeepCAL v2.1 online. How can I streamline your operations today?",
+                "Supply chain analysis at your service. What's the scenario?"
+            ];
+            
+            // Get random item from array
+            function getRandomItem(arr) {
+                return arr[Math.floor(Math.random() * arr.length)];
+            }
+            
+            // Add message to chat
+            function addMessage(sender, message, isTyping = false) {
+                const bubble = document.createElement('div');
+                bubble.className = `chat-bubble ${sender}-bubble`;
+                
+                if (isTyping) {
+                    bubble.innerHTML = `
+                        <div class="flex items-center space-x-2">
+                            <div class="voice-wave">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                            <span class="text-gray-400">DeepCAL is analyzing...</span>
+                        </div>
+                    `;
+                } else {
+                    const p = document.createElement('p');
+                    p.className = sender === 'user' ? 'text-white' : 'text-white';
+                    
+                    // Use Typewriter effect for bot messages
+                    if (sender === 'bot') {
+                        const typewriter = new Typewriter(p, {
+                            loop: false,
+                            delay: 20,
+                            cursor: ''
+                        });
+                        
+                        typewriter
+                            .typeString(message)
+                            .start();
+                    } else {
+                        p.textContent = message;
+                    }
+                    
+                    bubble.appendChild(p);
+                }
+                
+                chatContainer.appendChild(bubble);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            
+            // Show typing indicator
+            function showTyping() {
+                addMessage('bot', '', true);
+                return setTimeout(() => {
+                    const typingIndicators = document.querySelectorAll('.voice-wave');
+                    if (typingIndicators.length > 0) {
+                        typingIndicators[typingIndicators.length - 1].parentElement.parentElement.remove();
+                    }
+                }, 2000);
+            }
+            
+            // Enhanced input processing with better NLP simulation
+            function processInput() {
+                const message = userInput.value.trim();
+                if (message === '') return;
+                
+                addMessage('user', message);
+                userInput.value = '';
+                
+                // Show typing indicator
+                const typingTimeout = showTyping();
+                
+                // Analyze the input with enhanced keyword matching
+                setTimeout(() => {
+                    clearTimeout(typingTimeout);
+                    
+                    // Check for specific keywords in the knowledge base
+                    const lowerMessage = message.toLowerCase();
+                    let matchedCategory = null;
+                    
+                    for (const [category, terms] of Object.entries(knowledgeBase)) {
+                        if (terms.some(term => lowerMessage.includes(term))) {
+                            matchedCategory = category;
+                            break;
+                        }
+                    }
+                    
+                    // Process based on matched category or general query
+                    if (matchedCategory) {
+                        addMessage('bot', getRandomItem(wittyComments));
+                        
+                        setTimeout(() => {
+                            let analysisMessage = "";
+                            switch(matchedCategory) {
+                                case 'routes':
+                                    analysisMessage = "Analyzing transportation routes with enhanced v2.1 algorithms...";
+                                    break;
+                                case 'inventory':
+                                    analysisMessage = "Evaluating inventory patterns against market trends...";
+                                    break;
+                                case 'costs':
+                                    analysisMessage = "Calculating cost optimization opportunities...";
+                                    break;
+                                case 'risks':
+                                    analysisMessage = "Assessing supply chain risks with predictive models...";
+                                    break;
+                                default:
+                                    analysisMessage = "Processing your logistics query...";
+                            }
+                            
+                            addMessage('bot', analysisMessage);
+                            setTimeout(() => showResults(sampleData), 1500);
+                        }, 1000);
+                    } 
+                    else if (lowerMessage.includes('help') || lowerMessage.includes('what can you do')) {
+                        addMessage('bot', "I can analyze: transportation routes, inventory levels, cost structures, risk factors, vehicle utilization, and regulatory compliance. Try asking about any of these!");
+                    }
+                    else {
+                        addMessage('bot', "I specialize in logistics optimization. Try asking about routes, inventory, costs, or risks for detailed analysis!");
+                    }
+                }, 2000);
+            }
+            
+            // Enhanced results display with confidence indicators
+            function showResults(data) {
+                resultsSection.classList.remove('hidden');
+                resultsContent.innerHTML = '';
+                
+                // Set confidence level
+                const confidence = data.optimalRoute?.confidence || data.inventoryRecommendation?.confidence || data.riskAssessment?.confidence || 85;
+                confidenceLevel.style.width = `${confidence}%`;
+                
+                // Route visualization
+                if (data.optimalRoute) {
+                    const routeCard = document.createElement('div');
+                    routeCard.className = 'bg-slate-900 rounded-lg p-4';
+                    routeCard.innerHTML = `
+                        <h3 class="text-lg font-medium text-emerald-400 mb-3">Optimal Route Analysis</h3>
+                        <div class="route-visualization mb-4">
+                            <div class="route-line"></div>
+                            ${data.optimalRoute.stops.map(stop => `
+                                <div class="route-stop" style="left: ${stop.position}%"></div>
+                                <div class="route-label" style="left: ${stop.position}%">${stop.name}</div>
+                            `).join('')}
+                        </div>
+                        <div class="grid grid-cols-3 gap-4 text-sm mb-3">
+                            <div class="bg-slate-800 p-3 rounded">
+                                <div class="text-gray-400">Distance</div>
+                                <div class="text-white font-medium">${data.optimalRoute.distance}</div>
+                            </div>
+                            <div class="bg-slate-800 p-3 rounded">
+                                <div class="text-gray-400">Time</div>
+                                <div class="text-white font-medium">${data.optimalRoute.estimatedTime}</div>
+                            </div>
+                            <div class="bg-slate-800 p-3 rounded">
+                                <div class="text-gray-400">Cost</div>
+                                <div class="text-white font-medium">${data.optimalRoute.cost}</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h4 class="text-gray-400 mb-1">Traffic Patterns:</h4>
+                            <ul class="list-disc list-inside text-sm text-white space-y-1">
+                                ${data.optimalRoute.trafficPatterns.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="mt-4 p-3 bg-emerald-900/30 border border-emerald-800 rounded text-emerald-300">
+                            ${data.optimalRoute.savings} • ${data.optimalRoute.co2Reduction}
+                        </div>
+                    `;
+                    resultsContent.appendChild(routeCard);
+                }
+                
+                // Inventory recommendation
+                if (data.inventoryRecommendation) {
+                    const inventoryCard = document.createElement('div');
+                    inventoryCard.className = 'bg-slate-900 rounded-lg p-4';
+                    inventoryCard.innerHTML = `
+                        <h3 class="text-lg font-medium text-purple-400 mb-3">Inventory Recommendation</h3>
+                        <div class="mb-2">
+                            <span class="text-gray-400">Current stock:</span>
+                            <span class="text-white ml-2">${data.inventoryRecommendation.currentStock}</span>
+                        </div>
+                        <div class="mb-2">
+                            <span class="text-gray-400">Recommendation:</span>
+                            <span class="text-white ml-2">${data.inventoryRecommendation.recommendedAdjustment}</span>
+                        </div>
+                        <div class="mb-3 p-3 bg-purple-900/30 rounded text-purple-300 text-sm whitespace-pre-line">
+                            ${data.inventoryRecommendation.reason}
+                        </div>
+                        <div class="mb-2">
+                            <h4 class="text-gray-400 mb-1">Alternative Options:</h4>
+                            <ul class="list-disc list-inside text-sm text-white space-y-1">
+                                ${data.inventoryRecommendation.alternativeOptions.map(option => `<li>${option}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                    resultsContent.appendChild(inventoryCard);
+                }
+                
+                // Risk assessment
+                if (data.riskAssessment) {
+                    const riskCard = document.createElement('div');
+                    riskCard.className = 'bg-slate-900 rounded-lg p-4';
+                    riskCard.innerHTML = `
+                        <h3 class="text-lg font-medium text-amber-400 mb-3">Risk Assessment</h3>
+                        <div class="mb-3">
+                            <span class="px-2 py-1 rounded text-sm ${data.riskAssessment.alert.includes('High') ? 'bg-red-900 text-red-300' : 'bg-amber-900 text-amber-300'}">
+                                ${data.riskAssessment.alert}
+                            </span>
+                        </div>
+                        <div class="mb-4">
+                            <h4 class="text-gray-400 mb-1">Potential Issues:</h4>
+                            <ul class="list-disc list-inside text-sm text-white space-y-1">
+                                ${data.riskAssessment.factors.map(factor => `<li>${factor}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="mb-4">
+                            <h4 class="text-gray-400 mb-1">Mitigation Strategies:</h4>
+                            <ul class="list-disc list-inside text-sm text-white space-y-1">
+                                ${data.riskAssessment.mitigation.map(strategy => `<li>${strategy}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="text-gray-400 mb-1">Risk Timeline:</h4>
+                            <ul class="list-disc list-inside text-sm text-white space-y-1">
+                                ${Object.entries(data.riskAssessment.riskTimeline).map(([key, value]) => `<li>${key}: ${value}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                    resultsContent.appendChild(riskCard);
+                }
+                
+                // Cost analysis
+                if (data.costAnalysis) {
+                    const costCard = document.createElement('div');
+                    costCard.className = 'bg-slate-900 rounded-lg p-4';
+                    costCard.innerHTML = `
+                        <h3 class="text-lg font-medium text-blue-400 mb-3">Cost Analysis</h3>
+                        <div class="grid grid-cols-2 gap-4 mb-3">
+                            <div class="bg-slate-800 p-3 rounded">
+                                <div class="text-gray-400">Current Cost</div>
+                                <div class="text-white font-medium">${data.costAnalysis.currentCost}</div>
+                            </div>
+                            <div class="bg-slate-800 p-3 rounded">
+                                <div class="text-gray-400">Optimized Cost</div>
+                                <div class="text-white font-medium">${data.costAnalysis.optimizedCost}</div>
+                            </div>
+                        </div>
+                        <div class="mb-4 p-3 bg-blue-900/30 border border-blue-800 rounded text-blue-300">
+                            Potential savings: ${data.costAnalysis.savings}
+                        </div>
+                        <div>
+                            <h4 class="text-gray-400 mb-2">Cost Breakdown:</h4>
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="text-gray-400 border-b border-slate-700">
+                                        <th class="text-left pb-2">Category</th>
+                                        <th class="text-right pb-2">Current</th>
+                                        <th class="text-right pb-2">Optimized</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.costAnalysis.breakdown.map(item => `
+                                        <tr class="border-b border-slate-800">
+                                            <td class="py-2">${item.category}</td>
+                                            <td class="text-right">${item.current}</td>
+                                            <td class="text-right text-emerald-400">${item.optimized}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                    resultsContent.appendChild(costCard);
+                }
+                
+                // Scroll to results
+                setTimeout(() => {
+                    resultsSection.scrollIntoView({ behavior: 'smooth' });
+                }, 300);
+            }
+            
+            // Voice recognition functionality
+            function setupVoiceRecognition() {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                
+                if (!SpeechRecognition) {
+                    voiceBtn.disabled = true;
+                    voiceBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>Voice Not Supported';
+                    return;
+                }
+                
+                const recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+                
+                voiceBtn.addEventListener('click', function() {
+                    if (voiceBtn.classList.contains('bg-red-600')) {
+                        recognition.stop();
+                        voiceBtn.classList.remove('bg-red-600');
+                        voiceBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>Voice Input';
+                        return;
+                    }
+                    
+                    voiceBtn.classList.add('bg-red-600');
+                    voiceBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m4.242-12.728a9 9 0 012.728 2.728" /></svg>Listening...';
+                    
+                    recognition.start();
+                    
+                    recognition.onresult = function(event) {
+                        const speechResult = event.results[0][0].transcript;
+                        userInput.value = speechResult;
+                        voiceBtn.classList.remove('bg-red-600');
+                        voiceBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>Voice Input';
+                        processInput();
+                    };
+                    
+                    recognition.onerror = function(event) {
+                        console.error('Speech recognition error', event.error);
+                        voiceBtn.classList.remove('bg-red-600');
+                        voiceBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>Voice Input';
+                    };
+                });
+            }
+            
+            // Training panel functionality
+            function setupTrainingPanel() {
+                browseFiles.addEventListener('click', function() {
+                    trainingFiles.click();
+                });
+                
+                trainingFiles.addEventListener('change', function() {
+                    if (this.files.length > 0) {
+                        const fileList = Array.from(this.files).map(file => file.name).join(', ');
+                        browseFiles.textContent = `${this.files.length} file(s) selected`;
+                        browseFiles.classList.add('bg-emerald-900/30', 'border-emerald-500');
+                    }
+                });
+                
+                startTraining.addEventListener('click', function() {
+                    if (!trainingFiles.files.length) {
+                        browseFiles.classList.add('animate-pulse', 'border-red-500');
+                        setTimeout(() => {
+                            browseFiles.classList.remove('animate-pulse', 'border-red-500');
+                        }, 2000);
+                        return;
+                    }
+                    
+                    // Simulate training progress
+                    let progress = 0;
+                    const interval = setInterval(() => {
+                        progress += Math.random() * 5;
+                        if (progress >= 100) {
+                            progress = 100;
+                            clearInterval(interval);
+                            progressPercent.textContent = 'Training complete!';
+                            startTraining.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Model Updated';
+                            startTraining.classList.remove('bg-emerald-600');
+                            startTraining.classList.add('bg-purple-600');
+                        } else {
+                            progressPercent.textContent = `${Math.round(progress)}%`;
+                        }
+                        progressBar.style.width = `${progress}%`;
+                    }, 300);
+                });
+            }
+            
+            // Event listeners
+            sendBtn.addEventListener('click', processInput);
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    processInput();
+                }
+            });
+            
+            settingsBtn.addEventListener('click', function() {
+                settingsPanel.classList.remove('hidden');
+                trainingPanel.classList.add('hidden');
+            });
+            
+            trainingBtn.addEventListener('click', function() {
+                trainingPanel.classList.remove('hidden');
+                settingsPanel.classList.add('hidden');
+            });
+            
+            closeSettings.addEventListener('click', function() {
+                settingsPanel.classList.add('hidden');
+            });
+            
+            closeTraining.addEventListener('click', function() {
+                trainingPanel.classList.add('hidden');
+            });
+            
+            // Initial setup
+            setupVoiceRecognition();
+            setupTrainingPanel();
+            
+            // Initial greeting
+            setTimeout(() => {
+                addMessage('bot', getRandomItem(greetings));
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

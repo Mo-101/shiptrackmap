@@ -1,7 +1,26 @@
+@import 'mapbox-gl/dist/mapbox-gl.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import 'mapbox-gl/dist/mapbox-gl.css';
+
+/* Basic reset to ensure content is visible */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+.mapboxgl-map {
+  width: 100%;
+  height: 100%;
+}
 
 @layer base {
   :root {
@@ -28,7 +47,7 @@
   }
 
   * {
-    @apply border-border;
+    @apply border-gray-200;
   }
 
   body {

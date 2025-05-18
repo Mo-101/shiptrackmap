@@ -44,14 +44,49 @@ const MapContainer: React.FC<MapContainerProps> = ({
     if (containerRef.current) {
       const mapInstance = new mapboxgl.Map({
         container: containerRef.current,
-        style: 'mapbox://styles/mapbox/dark-v11',
-        center: [36.8219, -1.2921], // Nairobi
-        zoom: 4,
-        pitch: 40,
+        style: 'mapbox://styles/akanimo1/cm8bw23rp00i501sbgbr258r0',
+        center: [20, 5], // Centered on Africa
+        zoom: 10,
+        pitch: 0, // upright globe, no tilt
         bearing: 0,
-        projection: { name: 'mercator' },
+        projection: 'globe',
+        antialias: true,
+
       });
-      
+    // The following values can be changed to control rotation speed:
+    // At low zooms, complete a revolution every two minutes.
+    const secondsPerRevolution = 120;
+    // Above zoom level 5, do not rotate.
+    const maxSpinZoom = 5;
+    // Rotate at intermediate speeds between zoom levels 3 and 5.
+    const slowSpinZoom = 3;
+    let userInteracting = false;
+    let spinEnabled = true;
+    function spinGlobe() {
+        const zoom = mapInstance.getZoom();
+        if (spinEnabled && !userInteracting && zoom < maxSpinZoom) {
+            let distancePerSecond = 360 / secondsPerRevolution;
+            if (zoom > slowSpinZoom) {
+                // Slow spinning at higher zooms
+                const zoomDif = 
+                    (maxSpinZoom - zoom) / (maxSpinZoom - slowSpinZoom);
+                distancePerSecond *= zoomDif;
+            }
+            const center = mapInstance.getCenter();
+            center.lng -= distancePerSecond;
+            // Smoothly animate the map over one second.
+            // When this animation is complete, it calls a 'moveend' event.
+            mapInstance.easeTo({ center, duration: 1000, easing: (n) => n });
+        }
+    }
+
+
+
+      // Clean up animation on unmount
+      if (typeof window !== 'undefined') {
+        window.addEventListener('beforeunload', () => cancelAnimationFrame(animationFrameRef.current));
+      }
+
       // Fix: use the variable instead of modifying the read-only ref directly
       if (mapRef === localMap) {
         localMap.current = mapInstance;
@@ -66,7 +101,11 @@ const MapContainer: React.FC<MapContainerProps> = ({
         setLocalMapLoaded(true);
         if (externalSetMapLoaded) externalSetMapLoaded(true);
       });
-    }
+
+      mapInstance.on('moveend', () => {
+        userInteracting = false;
+        spinEnabled = true;
+      });
     
     return () => {
       // Fix: Only access current if it exists, don't try to modify the ref directly
@@ -77,6 +116,7 @@ const MapContainer: React.FC<MapContainerProps> = ({
         externalMap.current.remove();
         // Again, workaround for read-only refs
         (externalMap as any).current = null;
+      }
       }
     };
   }, [externalMapContainer, externalMap, externalSetMapLoaded]);

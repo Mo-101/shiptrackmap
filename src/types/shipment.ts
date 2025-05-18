@@ -1,5 +1,6 @@
 
 export interface Shipment {
+  request_reference: string;
   id: string;
   name: string;
   type: 'ship' | 'charter' | 'truck';

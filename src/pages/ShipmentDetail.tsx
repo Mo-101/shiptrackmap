@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Package, Warehouse, FileText, Calendar, Weight, Database, DollarSign, Box, Truck, ArrowLeft, MapPin, Clock, Ship, Plane } from 'lucide-react';
+import { Package, Warehouse, FileText, Calendar, Weight, Database, DollarSign, Box, Truck, MapPin, Clock, Ship, Plane } from 'lucide-react';
 import { Card } from "@/components/ui/card";
 import { Shipment } from '../types/shipment';
 
@@ -19,7 +19,6 @@ const ShipmentDetail: React.FC<ShipmentDetailProps> = ({ shipment }) => {
         <h1 className="text-2xl font-bold text-white mb-2">Shipment Not Found</h1>
         <p className="text-gray-400 mb-6">Could not locate shipment with ID: {id}</p>
         <Link to="/" className="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-2 rounded-md inline-flex items-center gap-2 transition-colors">
-          <ArrowLeft className="w-4 h-4" />
           Back to Dashboard
         </Link>
       </div>
@@ -44,7 +43,6 @@ const ShipmentDetail: React.FC<ShipmentDetailProps> = ({ shipment }) => {
         to="/" 
         className="inline-flex items-center text-cyan-400 hover:text-cyan-300 transition-colors mb-8 group"
       >
-        <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
         Back to Dashboard
       </Link>
       

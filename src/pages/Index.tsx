@@ -5,7 +5,7 @@ import ShipmentMap from '../components/ShipmentMap';
 import ShipmentList from '../components/ShipmentList';
 import ShipmentDetail from './ShipmentDetail';
 import { Shipment } from '../types/shipment';
-import { BarChart2 } from 'lucide-react';
+import { BarChart2, FileBarChart2 } from 'lucide-react';
 import { convertFreightToShipments } from '../services/unifiedDataService';
 
 const Index = () => {
@@ -31,22 +31,7 @@ const Index = () => {
   }, [location.pathname, shipments]);
 
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <div className="h-screen w-screen flex flex-col bg-palette-darkblue">
-            {/* Analytics Link */}
-            <div className="absolute top-4 right-4 z-10">
-              <Link 
-                to="/analytics" 
-                className="flex items-center gap-2 bg-secondary/80 hover:bg-secondary text-white py-2 px-4 rounded-full text-sm font-medium transition-colors shadow-lg"
-              >
-                <BarChart2 size={16} />
-                <span>Analytics</span>
-              </Link>
-            </div>
-            
+    <div className="h-screen w-screen flex flex-col bg-palette-darkblue">
             <div className="flex flex-1 overflow-hidden">
               <ShipmentList
                 shipments={shipments}
@@ -61,13 +46,6 @@ const Index = () => {
               </div>
             </div>
           </div>
-        }
-      />
-      <Route
-        path="/shipment/:id"
-        element={<ShipmentDetail shipment={shipments.find(s => s.id === location.pathname.split('/').pop())} />}
-      />
-    </Routes>
   );
 };
 

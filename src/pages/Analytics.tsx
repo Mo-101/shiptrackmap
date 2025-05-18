@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -14,9 +13,9 @@ import {
   Tooltip, Legend, ResponsiveContainer, 
   AreaChart, Area, LineChart as RechartLineChart, Line, CartesianGrid
 } from 'recharts';
-import { unifiedDataState } from '../services/unifiedDataService';
-import NavHeader from '../components/NavHeader';
+import { freightData } from '../services/analyticsDataService';
 import { forwarderLogos } from '../utils/forwarderLogos';
+import { unifiedDataState } from '@/services/unifiedDataService';
 
 // Type definition for our analytics data
 interface AggregatedLogisticsData {
@@ -71,30 +70,42 @@ const Analytics: React.FC = () => {
         setIsLoading(true);
         
         // Simulate API call with delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Get data from unified data service
-        const {
-          aggregatedData: unifiedAggregatedData,
-          topCarriers: unifiedTopCarriers,
-          topDestinations: unifiedTopDestinations,
-          monthlyTrends: unifiedMonthlyTrends,
-          countryRiskAssessment: unifiedRiskAssessment
-        } = unifiedDataState;
-        
-        setAggregatedData(unifiedAggregatedData);
-        setTopCarriers(unifiedTopCarriers);
-        setTopDestinations(unifiedTopDestinations);
-        setMonthlyTrends(unifiedMonthlyTrends);
-        setRiskAssessment(unifiedRiskAssessment);
-        
-        setIsLoading(false);
+        // Compute aggregated metrics directly from freightData
+        const totalCost = freightData.reduce((sum, row) => sum + row.kenAir + row.dhlGlobal + row.kuehneNagel + row.scanGlobal + row.dhlExpress + row.agl + row.siginon + row.freightInTime, 0);
+        const totalWeight = freightData.reduce((sum, row) => sum + row.weight, 0);
+        const totalVolume = freightData.reduce((sum, row) => sum + row.volume, 0);
+        const totalCountries = freightData.length;
+        const totalShipments = freightData.length;
+        // Count unique forwarders by checking if their value is > 0 in any row
+        const forwarderNames = ['kenAir','dhlGlobal','kuehneNagel','scanGlobal','dhlExpress','agl','siginon','freightInTime'];
+        const totalFreightForwarders = forwarderNames.filter(fwd => freightData.some(row => row[fwd] > 0)).length;
+        // Mocked values for avgTransportDays, avgCostPerKg, fleetEfficiency
+        const avgTransportDays = 7 + Math.round(Math.random() * 7); // placeholder
+        const avgCostPerKg = totalCost / (totalWeight || 1);
+        const fleetEfficiency = 85; // placeholder
+        setAggregatedData({ totalCost, totalWeight, totalVolume, totalCountries, totalShipments, totalFreightForwarders, avgTransportDays, avgCostPerKg, fleetEfficiency });
+
+        // Top carriers by total revenue
+        const carrierTotals = forwarderNames.map(fwd => ({ name: fwd, value: freightData.reduce((sum, row) => sum + row[fwd], 0) }));
+        carrierTotals.sort((a, b) => b.value - a.value);
+        setTopCarriers(carrierTotals);
+
+        // Top destinations by total shipment value
+        const topDest = freightData.map(row => ({ country: row.country, value: row.kenAir + row.dhlGlobal + row.kuehneNagel + row.scanGlobal + row.dhlExpress + row.agl + row.siginon + row.freightInTime })).sort((a, b) => b.value - a.value);
+        setTopDestinations(topDest);
+
+        // Monthly trends (mocked, as base data lacks dates)
+        setMonthlyTrends([]);
+        // Risk assessment (mocked, as base data lacks risk info)
+        setRiskAssessment([]);
       } catch (error) {
-        console.error('Failed to load data:', error);
+        // Handle error
+      } finally {
         setIsLoading(false);
       }
     };
-    
     loadData();
   }, []);
   
@@ -296,8 +307,6 @@ const Analytics: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full bg-palette-darkblue text-white overflow-hidden flex flex-col">
-      <NavHeader toggleSidebar={() => {}} />
-      
       <div className="flex-1 overflow-auto">
         <div className="max-w-screen-2xl mx-auto p-4">
           <div className="mb-6 relative">

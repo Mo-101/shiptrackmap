@@ -64,6 +64,16 @@ export interface DeepCALOutput {
     probability: number;
     credibleInterval: [number, number];
   };
+  // Symbolic engine required fields
+  decisionMatrix: number[][];
+  criteriaWeights: number[];
+  criteriaTypes: string[];
+  alternatives: string[];
+  forwarders: ForwarderPerformance[];
+  originLat: number;
+  originLng: number;
+  destLat: number;
+  destLng: number;
 }
 
 export interface DeepCALFeedback {

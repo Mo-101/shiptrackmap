@@ -1,0 +1,263 @@
+openapi: 3.0.0
+info:
+  title: DeepCAL Oracle API
+  description: Covenant-bound shipment analysis and decision API.
+  version: v1
+servers:
+- url: /
+paths:
+  /analyze:
+    post:
+      summary: Run shipment analysis with AHP-TOPSIS engine
+      operationId: analyze_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/analyze_body"
+            examples:
+              shipment-scenario:
+                summary: Standard cargo shipment from port A to B
+                value:
+                  origin: Port of Shanghai
+                  destination: Port of Los Angeles
+                  weight_kg: 12000
+                  volume_cbm: 28.5
+                  urgency: high
+                  criteria:
+                    cost: 0.7
+                    speed: 0.9
+                    reliability: 0.85
+                    risk_avoidance: 0.6
+        required: true
+      responses:
+        "200":
+          description: Analysis successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/inline_response_200"
+              examples:
+                successful-analysis:
+                  summary: Optimal route with forwarder and score
+                  value:
+                    best_forwarder: OceanXpress
+                    route_score: 87.4
+                    rules_fired:
+                    - weight-check
+                    - volume-threshold
+                    - urgency-adjust
+                    explanation:
+                    - Matched priority route via Panama
+                    - Adjusted for storm risk
+                    route_overlay_url: https://map.deepcal.app/overlay/route123
+      x-openapi-router-controller: swagger_server.controllers.default_controller
+  /rules/{ref}:
+    get:
+      summary: Get rule invocations for a decision reference
+      operationId: rules_ref_get
+      parameters:
+      - name: ref
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: List of symbolic rules triggered
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/inline_response_200_1"
+                x-content-type: application/json
+              examples:
+                rule-evaluation:
+                  summary: Rule trace for route_abc123
+                  value:
+                  - id: rule-01
+                    description: Weight threshold met
+                    result: passed
+                  - id: rule-02
+                    description: Volume limit breached
+                    result: failed
+      x-openapi-router-controller: swagger_server.controllers.default_controller
+  /memory/{request_reference}:
+    get:
+      summary: Get memory recall for a decision
+      operationId: memory_request_reference_get
+      parameters:
+      - name: request_reference
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Recalled memory state and logs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/inline_response_200_2"
+              examples:
+                full-memory:
+                  summary: Recalled analysis state from ID abc123
+                  value:
+                    historical_decision:
+                      best_forwarder: OceanXpress
+                      route_score: 87.4
+                      rules_fired:
+                      - weight-check
+                      - volume-threshold
+                      explanation:
+                      - Risk mitigation engaged
+                      route_overlay_url: https://map.deepcal.app/overlay/route123
+                    cognitive_log:
+                    - Input received
+                    - Criteria weights parsed
+                    - Forwarder matrix computed
+                    - Final selection complete
+      x-openapi-router-controller: swagger_server.controllers.default_controller
+components:
+  schemas:
+    AnalyzeOutput:
+      type: object
+      properties:
+        best_forwarder:
+          type: string
+        route_score:
+          type: number
+        rules_fired:
+          type: array
+          items:
+            type: string
+        explanation:
+          type: array
+          items:
+            type: string
+        route_overlay_url:
+          type: string
+      example:
+        rules_fired:
+        - rules_fired
+        - rules_fired
+        best_forwarder: best_forwarder
+        route_overlay_url: route_overlay_url
+        explanation:
+        - explanation
+        - explanation
+        route_score: 0.8008281904610115
+    analyze_criteria:
+      required:
+      - cost
+      - reliability
+      - risk_avoidance
+      - speed
+      type: object
+      properties:
+        cost:
+          type: number
+        speed:
+          type: number
+        reliability:
+          type: number
+        risk_avoidance:
+          type: number
+    analyze_body:
+      required:
+      - criteria
+      - destination
+      - origin
+      - urgency
+      - volume_cbm
+      - weight_kg
+      type: object
+      properties:
+        origin:
+          type: string
+        destination:
+          type: string
+        weight_kg:
+          type: number
+        volume_cbm:
+          type: number
+        urgency:
+          type: string
+          enum:
+          - low
+          - medium
+          - high
+        criteria:
+          $ref: "#/components/schemas/analyze_criteria"
+    inline_response_200:
+      type: object
+      properties:
+        best_forwarder:
+          type: string
+        route_score:
+          type: number
+        rules_fired:
+          type: array
+          items:
+            type: string
+        explanation:
+          type: array
+          items:
+            type: string
+        route_overlay_url:
+          type: string
+      example:
+        rules_fired:
+        - rules_fired
+        - rules_fired
+        best_forwarder: best_forwarder
+        route_overlay_url: route_overlay_url
+        explanation:
+        - explanation
+        - explanation
+        route_score: 0.8008281904610115
+    inline_response_200_1:
+      type: object
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+        result:
+          type: string
+          enum:
+          - passed
+          - failed
+      example:
+        result: passed
+        description: description
+        id: id
+    inline_response_200_2:
+      type: object
+      properties:
+        historical_decision:
+          $ref: "#/components/schemas/AnalyzeOutput"
+        cognitive_log:
+          type: array
+          items:
+            type: string
+      example:
+        cognitive_log:
+        - cognitive_log
+        - cognitive_log
+        historical_decision:
+          rules_fired:
+          - rules_fired
+          - rules_fired
+          best_forwarder: best_forwarder
+          route_overlay_url: route_overlay_url
+          explanation:
+          - explanation
+          - explanation
+          route_score: 0.8008281904610115
+

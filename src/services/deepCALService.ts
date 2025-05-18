@@ -277,8 +277,30 @@ export const processDeepCAL = (input: DeepCALInput): DeepCALOutput => {
     bayesianConfidence: {
       probability: confidence,
       credibleInterval: [confidence - 0.1, confidence + 0.1]
-    }
+    },
+    // --- Symbolic Engine Required Fields ---
+    decisionMatrix: [
+      // Simulated decision matrix: each row is an alternative, columns are criteria
+      // For demo, just random values for each forwarder/criterion
+      ...Object.values(forwarderPerformance).map(fwd => [
+        scalarizeNeutrosophic(fwd.costMetric),
+        scalarizeNeutrosophic(fwd.timeMetric),
+        scalarizeNeutrosophic(fwd.reliabilityMetric),
+        scalarizeNeutrosophic(fwd.riskMetric),
+        scalarizeNeutrosophic(fwd.responsivenessMetric)
+      ])
+    ],
+    criteriaWeights: criteria.map(c => weights[c] || 0),
+    criteriaTypes: ['cost', 'time', 'reliability', 'risk', 'responsiveness'].map(c => c === 'cost' ? 'cost' : 'benefit'),
+    alternatives: Object.values(forwarderPerformance).map(fwd => fwd.forwarderName),
+    forwarders: Object.values(forwarderPerformance),
+    // Simulated coordinates for origin/destination (real app: geocode these)
+    originLat: -1.2921, // Nairobi (example)
+    originLng: 36.8219,
+    destLat: -17.8252, // Harare (example)
+    destLng: 31.0335
   };
+
 };
 
 // Example of feedback handling function
