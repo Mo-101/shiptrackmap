@@ -13,10 +13,11 @@ const Index = () => {
   const [activeShipment, setActiveShipment] = useState<Shipment | undefined>();
   const location = useLocation();
   
-  // Load shipments from our unified data service
+  // Load shipments from /deeptrack_3.json
   useEffect(() => {
-    const loadedShipments = convertFreightToShipments();
-    setShipments(loadedShipments);
+    fetch('/deeptrack_3.json')
+      .then(res => res.json())
+      .then(data => setShipments(data));
   }, []);
   
   // Set active shipment based on URL when on detail page

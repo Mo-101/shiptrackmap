@@ -1,6 +1,23 @@
 
 export interface Shipment {
   request_reference: string;
+  'carrier+cost': number | string;
+  weight_kg: number | string;
+  volume_cbm: number | string;
+  destination_country?: string;
+  delivery_status?: string;
+  date_of_collection?: string;
+  date_of_arrival_destination?: string;
+  carrier?: string;
+  kuehne_nagel?: number | string;
+  scan_global_logistics?: number | string;
+  dhl_express?: number | string;
+  dhl_global?: number | string;
+  bwosi?: number | string;
+  agl?: number | string;
+  siginon?: number | string;
+  frieght_in_time?: number | string;
+
   id: string;
   name: string;
   type: 'ship' | 'charter' | 'truck';
@@ -49,7 +66,7 @@ export interface Shipment {
   responsivenessFactor?: number;        // Responsiveness of the freight forwarder
   
   // Carrier information
-  carrier?: string;                     // Carrier used by the freight forwarder
+  // carrier?: string;                     // Carrier used by the freight forwarder
   carrierCost?: number;                 // Cost charged by the carrier
   
   // Additional fields

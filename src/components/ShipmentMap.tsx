@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { Shipment } from '../types/shipment';
 import WeatherInfo from './WeatherInfo';
@@ -14,15 +14,65 @@ import { Activity, ChevronRight, Zap, Layers, FileWarning, CircleArrowUp as Arro
 
 // Update to use the provided token
 mapboxgl.accessToken = 'pk.eyJ1IjoiYWthbmltbzEiLCJhIjoiY2w5ODU2cjR2MDR3dTNxcXRpdG5jb3Z6dyJ9.vi2wspa-B9a9gYYWMpEm0A';
+
 interface ShipmentMapProps {
   shipments: Shipment[];
   activeShipment?: Shipment;
+  flyToShipmentRef?: React.MutableRefObject<(shipment: Shipment) => void>;
 }
-const ShipmentMap: React.FC<ShipmentMapProps & { flyToShipmentRef?: React.MutableRefObject<(shipment: Shipment) => void> }> = ({
+
+// Error Boundary for ShipmentMap component
+class MapErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: Error | null}> {
+  constructor(props: {children: React.ReactNode}) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("ShipmentMap error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="text-white p-8 text-center bg-palette-darkblue w-full h-full flex flex-col items-center justify-center">
+          <FileWarning size={48} className="text-palette-mint mb-4" />
+          <h2 className="text-xl font-bold mb-2">Map Display Error</h2>
+          <p className="mb-4">{this.state.error?.message || "An unknown error occurred"}</p>
+          <button 
+            onClick={() => this.setState({ hasError: false, error: null })} 
+            className="bg-palette-mint/30 hover:bg-palette-mint/50 text-white px-4 py-2 rounded-md"
+          >
+            Try Again
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+// Inner component that does the actual rendering
+const ShipmentMapContent: React.FC<ShipmentMapProps> = ({
   shipments,
   activeShipment,
   flyToShipmentRef
 }) => {
+  // Defensive: If shipments is not an array or is empty, show fallback UI
+  if (!Array.isArray(shipments) || shipments.length === 0) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="text-white p-8 text-center">No shipment data available. Please check your data source.</div>
+      </div>
+    );
+  }
+
+  // State definitions
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<[number, number] | null>(null);
@@ -30,8 +80,18 @@ const ShipmentMap: React.FC<ShipmentMapProps & { flyToShipmentRef?: React.Mutabl
   const [hoveredShipment, setHoveredShipment] = useState<Shipment | null>(null);
   const [showDeepCALOverlay, setShowDeepCALOverlay] = useState(false);
 
-  // Expose flyToShipment
-  React.useEffect(() => {
+  // Track animation frames for cleanup
+  const animationFrameRef = useRef<number | null>(null);
+  // Custom properties for different route types
+  const routeProps = useRef<Record<string, CustomLayerProps>>({});
+
+  // Memoize toggle callback to prevent unnecessary re-renders
+  const toggleDeepCALOverlay = useCallback(() => {
+    setShowDeepCALOverlay(prev => !prev);
+  }, []);
+
+  // Expose flyToShipment - use callback pattern
+  useEffect(() => {
     if (flyToShipmentRef) {
       flyToShipmentRef.current = (shipment: Shipment) => {
         if (
@@ -47,39 +107,51 @@ const ShipmentMap: React.FC<ShipmentMapProps & { flyToShipmentRef?: React.Mutabl
           });
         }
       };
-
     }
-  }, [mapLoaded]);
+  }, [flyToShipmentRef]);
 
-
-  // Track animation frames for cleanup
-  const animationFrameRef = useRef<number | null>(null);
-  // Custom properties for different route types
-  const routeProps = useRef<Record<string, CustomLayerProps>>({});
+  // Route generation effect
   useEffect(() => {
     if (!mapLoaded || !map.current?.isStyleLoaded()) return;
-    generateMapRoutes(map.current, shipments, activeShipment);
+    try {
+      generateMapRoutes(map.current, shipments, activeShipment);
+    } catch (error) {
+      console.error("Error generating map routes:", error);
+    }
   }, [shipments, activeShipment, mapLoaded]);
-  const toggleDeepCALOverlay = () => {
-    setShowDeepCALOverlay(prev => !prev);
-  };
-  return <div className="relative w-full h-full bg-palette-darkblue">
+
+  return (
+    <div className="relative w-full h-full bg-palette-darkblue">
       <div ref={mapContainer} className="absolute inset-0" />
       
       {/* Initialize the map */}
-      <MapContainer shipments={shipments} selectedShipment={activeShipment} mapContainer={mapContainer} map={map} routeProps={routeProps} animationFrameRef={animationFrameRef} setMapLoaded={setMapLoaded} setSelectedLocation={setSelectedLocation} setHoveredShipment={setHoveredShipment} />
+      <MapContainer 
+        shipments={shipments} 
+        selectedShipment={activeShipment} 
+        mapContainer={mapContainer} 
+        map={map} 
+        routeProps={routeProps} 
+        animationFrameRef={animationFrameRef} 
+        setMapLoaded={setMapLoaded} 
+        setSelectedLocation={setSelectedLocation} 
+        setHoveredShipment={setHoveredShipment} 
+      />
       
       {/* Sci-fi overlay elements */}
       <MapOverlay />
       
       {/* DeepCAL Workflow Toggle */}
-      <button onClick={toggleDeepCALOverlay} className="absolute top-4 right-4 z-10 bg-palette-mint/20 hover:bg-palette-mint/40 rounded-md flex items-center space-x-1 transition-colors px-[21px] py-[8px] my-[63px] text-lg text-center font-bold text-amber-500">
+      <button 
+        onClick={toggleDeepCALOverlay} 
+        className="absolute top-4 right-4 z-10 bg-palette-mint/20 hover:bg-palette-mint/40 rounded-md flex items-center space-x-1 transition-colors px-[21px] py-[8px] my-[63px] text-lg text-center font-bold text-amber-500"
+      >
         <span className="h-2 w-2 bg-palette-mint rounded-full animate-pulse"></span>
         <span>DeepCAL {showDeepCALOverlay ? 'Active' : 'Inactive'}</span>
       </button>
       
       {/* DeepCAL Workflow Overlay */}
-      {showDeepCALOverlay && <div className="absolute inset-0 bg-palette-darkblue/80 z-20 flex items-center justify-center">
+      {showDeepCALOverlay && (
+        <div className="absolute inset-0 bg-palette-darkblue/80 z-20 flex items-center justify-center">
           <div className="w-5/6 h-5/6 bg-palette-blue/30 border border-palette-mint/30 rounded-lg p-4 overflow-auto">
             <h2 className="text-xl font-bold text-palette-mint mb-4">DeepCAL Algorithm Workflow</h2>
             
